@@ -17,8 +17,8 @@ async function callGemini({ system, contents, json = false }) {
     throw new Error('GEMINI_API_KEY_MISSING');
   }
 
-  const preferredModel = process.env.GEMINI_MODEL || 'gemini-3.6-flash';
-  const modelsToTry = [preferredModel, 'gemini-3.6-flash', 'gemini-3.5-flash', 'gemini-3.1-flash-lite'];
+  const preferredModel = process.env.GEMINI_MODEL || 'gemini-3.8-flash';
+  const modelsToTry = [preferredModel, 'gemini-3.8-flash', 'gemini-3.7-flash', 'gemini-3.6-flash', 'gemini-3.5-flash', 'gemini-3.1-flash-lite'];
   const uniqueModels = [...new Set(modelsToTry)];
 
   let lastError = null;
