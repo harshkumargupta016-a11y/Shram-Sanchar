@@ -290,7 +290,7 @@ const { useState, useEffect, useRef, useCallback, useMemo } = React;
    Use the in-app "AI settings" button instead (stored only in this browser).
    ===================================================================== */
 const GEMINI_API_KEY = "";               // optional; leave empty and use AI settings
-const GEMINI_MODEL_DEFAULT = "gemini-2.5-flash";
+const GEMINI_MODEL_DEFAULT = "gemini-3.8-flash";
 
 /* =====================================================================
    Small utilities
@@ -347,27 +347,14 @@ async function gemini({ system, contents, json = false }) {
   // First try secure server-side API endpoint
   try {
     const promptText = contents?.[contents.length - 1]?.parts?.[0]?.text || "";
-    if (json && system?.includes("triage grievances")) {
-      // Priority check call
-      const res = await fetch('/api/ai/assistant', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt: `System: ${system}\n\nUser text: ${promptText}` })
-      });
-      if (res.ok) {
-        const data = await res.json();
-        if (data.reply) return data.reply;
-      }
-    } else {
-      const res = await fetch('/api/ai/assistant', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt: promptText, history: contents.slice(0, -1) })
-      });
-      if (res.ok) {
-        const data = await res.json();
-        if (data.reply) return data.reply;
-      }
+    const res = await fetch('/api/ai/assistant', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt: system ? `System: ${system}\n\nUser text: ${promptText}` : promptText, history: contents.slice(0, -1) })
+    });
+    if (res.ok) {
+      const data = await res.json();
+      if (data.reply) return data.reply;
     }
   } catch (e) {}
 
@@ -375,7 +362,8 @@ async function gemini({ system, contents, json = false }) {
   const s = getSettings(); const key = s.geminiKey || GEMINI_API_KEY;
   if (!key) throw new Error("NO_KEY");
   if (!isOnline()) throw new Error("OFFLINE");
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/${s.model || GEMINI_MODEL_DEFAULT}:generateContent`;
+  const modelToUse = s.model && s.model !== "gemini-2.5-flash" ? s.model : GEMINI_MODEL_DEFAULT;
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelToUse}:generateContent`;
   const body = { contents, generationConfig: { temperature: json ? 0.1 : 0.6, ...(json ? { responseMimeType:"application/json" } : {}) } };
   if (system) body.systemInstruction = { parts:[{ text: system }] };
   const r = await fetch(url, { method:"POST", headers:{ "Content-Type":"application/json", "x-goog-api-key": key }, body: JSON.stringify(body) });
@@ -1094,8 +1082,7 @@ function Chat() {
       setMsgs(m => [...m, { role:"bot", text: reply || "Sorry, I could not answer that." }]);
     } catch (e) {
       const hit = FAQ.find(x => x[0].test(text));
-      const why = e.message === "NO_KEY" ? "Add your Gemini key in AI settings for full answers." : e.message === "OFFLINE" ? "You are offline, so I am using saved answers." : "The AI is unavailable right now (" + e.message + ").";
-      setMsgs(m => [...m, { role:"bot", text:(hit ? hit[1] : "For any eShram question, call the helpline 14434 or visit eshram.gov.in.") + "\n\n" + why }]);
+      setMsgs(m => [...m, { role:"bot", text: (hit ? hit[1] : "For any eShram question, call the helpline 14434 or visit eshram.gov.in.") }]);
     }
     setBusy(false);
   };
