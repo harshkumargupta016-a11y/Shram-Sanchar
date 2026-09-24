@@ -271,6 +271,60 @@ app.post('/api/eshram/mobility-update', (req, res) => {
   res.json(result);
 });
 
+// 5. Additional REST APIs for schemes, help, authentication, and mobility
+const SCHEMES_DATA = [
+  { id: '1', category: 'Pension', name: 'Pradhan Mantri Shram Yogi Maandhan (PM-SYM)', description: 'Voluntary & contributory pension scheme providing ₹3,000/month after age 60.', target_audience: 'Unorganised workers aged 18-40', benefit: '₹3,000 monthly pension', official_url: 'https://maandhan.in' },
+  { id: '2', category: 'Health', name: 'Ayushman Bharat PM-JAY', description: 'Free healthcare coverage up to ₹5 Lakh per family per year for secondary & tertiary hospitalisation.', target_audience: 'Low-income migrant families', benefit: 'Health coverage up to ₹5 Lakh/year', official_url: 'https://pmjay.gov.in' },
+  { id: '3', category: 'Housing', name: 'Affordable Rental Housing Complexes (ARHCs / PMAY)', description: 'Dignified rental housing near work sites for urban migrants and industrial workers.', target_audience: 'Urban migrants and industrial workers', benefit: 'Subsidised rental accommodation near work', official_url: 'https://pmaymis.gov.in' },
+  { id: '4', category: 'Financial Support', name: 'eShram Accidental Death & Disability Cover', description: 'Insurance cover of ₹2 Lakh for accidental death/permanent disability and ₹1 Lakh for partial disability.', target_audience: 'All active eShram card holders', benefit: '₹2 Lakh accidental insurance', official_url: 'https://eshram.gov.in' },
+  { id: '5', category: 'Employment', name: 'National Career Service (NCS) Portal Integration', description: 'Nationwide job portal connecting unorganised workers directly with verified employers.', target_audience: 'Migrant workers seeking employment', benefit: 'Direct employment matching', official_url: 'https://www.ncs.gov.in' },
+  { id: '6', category: 'Skill Development', name: 'Pradhan Mantri Kaushal Vikas Yojana (PMKVY)', description: 'Free skill training, certification, and RPL (Recognition of Prior Learning) for unorganised workers.', target_audience: 'Construction and informal sector workers', benefit: 'Free skill training & certification', official_url: 'https://www.pmkvyofficial.org' }
+];
+
+const HELP_DATA = [
+  { id: '1', title: 'Login Help', content: 'Use your 12-digit UAN number and registered mobile number. For demo purposes, the OTP code is 123456.' },
+  { id: '2', title: 'Mobility Update Help', content: 'You can update your work destination anytime by voice or typing. Location permission is voluntary and read ONCE per update.' },
+  { id: '3', title: 'Privacy & GPS', content: 'Shram Sanchar NEVER tracks you in the background. No continuous GPS trails are stored.' },
+  { id: '4', title: 'eShram Portal Info', content: 'eShram is the official Government portal for unorganised workers. Call official helpline 14434 for card issues.' }
+];
+
+app.get('/api/schemes', (req, res) => {
+  res.json({ success: true, schemes: SCHEMES_DATA });
+});
+
+app.get('/api/help', (req, res) => {
+  res.json({ success: true, help: HELP_DATA });
+});
+
+app.post('/api/auth/login', (req, res) => {
+  const { name, uan, mobile } = req.body;
+  if (!name || !uan || !mobile) {
+    return res.status(400).json({ error: 'Name, UAN, and Mobile number are required.' });
+  }
+  return res.json({ success: true, message: 'OTP sent successfully. Demo OTP is 123456.', otp_sent: true });
+});
+
+app.post('/api/auth/verify-otp', (req, res) => {
+  const { uan, otp } = req.body;
+  if (otp === '123456') {
+    return res.json({ success: true, token: 'demo-token-' + Date.now(), uan });
+  }
+  return res.status(401).json({ error: 'Invalid OTP. For demo use 123456.' });
+});
+
+app.post('/api/consent', (req, res) => {
+  const { uan, location_consent, ai_consent } = req.body;
+  res.json({
+    success: true,
+    consent_status: {
+      uan,
+      location_consent: !!location_consent,
+      ai_consent: !!ai_consent,
+      timestamp: new Date().toISOString()
+    }
+  });
+});
+
 // Fallback all SPA routes to index.html
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));

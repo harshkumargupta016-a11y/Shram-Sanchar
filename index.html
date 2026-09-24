@@ -3,31 +3,33 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Shram Sanchar — Consent-First Mobility Layer for eShram</title>
+<title>Shram Sanchar — consent-first mobility layer for eShram</title>
 <meta name="theme-color" content="#0E2A5C">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Noto+Serif:wght@600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;600;700&family=Noto+Serif:wght@600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 <style>
-/* ============ Design tokens & Public Service Aesthetic ============ */
+/* ============ Design tokens ============
+   Palette comes from the pitch deck: deck navy, saffron, field green.
+   Type: Noto covers Devanagari + other Indic scripts, so Hindi/Marathi/etc. render properly. */
 :root{
   --navy:#0E2A5C; --navy-2:#173F86; --navy-3:#DCE5F5;
   --saffron:#F07D1A; --saffron-2:#FBE5D0;
   --green:#1F8A4C; --green-2:#DDF0E4;
   --red:#C62828; --red-2:#FBE0E0;
   --amber:#A66B00; --amber-2:#FFF0C7;
-  --ink:#14182B; --muted:#5B6478; --line:#DDE2EE; --bg:#F5F7FB; --card:#ffffff;
-  --serif:'Noto Serif','Georgia',serif;
-  --sans:'Noto Sans','Segoe UI',system-ui,-apple-system,sans-serif;
-  --r-sm:8px; --r-md:14px; --r-lg:20px;
+  --ink:#14182B; --muted:#5B6478; --line:#DDE2EE; --bg:#F5F7FB; --card:#fff;
+  --serif:'Noto Serif','Cambria','Georgia',serif;
+  --sans:'Noto Sans','Segoe UI',system-ui,-apple-system,'Nirmala UI',sans-serif;
+  --r-sm:8px; --r-md:14px; --r-lg:22px;
 }
 *{box-sizing:border-box}
 html{scroll-behavior:smooth}
 body{margin:0;font-family:var(--sans);color:var(--ink);background:var(--bg);line-height:1.55;-webkit-font-smoothing:antialiased}
 h1,h2,h3,h4{font-family:var(--serif);margin:0;line-height:1.2;color:var(--navy)}
-h1{font-size:clamp(1.9rem,4vw,3.1rem);letter-spacing:-.01em}
-h2{font-size:clamp(1.4rem,2.6vw,2.0rem)}
+h1{font-size:clamp(2rem,4.6vw,3.3rem);letter-spacing:-.01em}
+h2{font-size:clamp(1.5rem,2.8vw,2.1rem)}
 h3{font-size:1.15rem}
 p{margin:0}
 a{color:var(--navy-2)}
@@ -36,32 +38,27 @@ button{font-family:inherit;cursor:pointer}
 .wrap{max-width:1180px;margin:0 auto;padding:0 20px}
 .muted{color:var(--muted)}
 .small{font-size:.85rem}
-.tri{height:5px;background:linear-gradient(90deg,var(--saffron) 0 33.3%,#ffffff 33.3% 66.6%,var(--green) 66.6%);border-bottom:1px solid var(--line)}
+.tri{height:5px;background:linear-gradient(90deg,var(--saffron) 0 33.3%,#fff 33.3% 66.6%,var(--green) 66.6%);border-bottom:1px solid var(--line)}
 
-/* ============ Header & Navigation ============ */
-.nav{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.96);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
-.nav .wrap{display:flex;align-items:center;gap:12px;height:66px}
+/* ============ Nav ============ */
+.nav{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.94);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.nav .wrap{display:flex;align-items:center;gap:16px;height:64px}
 .brand{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--navy);font-family:var(--serif);font-weight:700;font-size:1.15rem;white-space:nowrap}
 .brand .mark{width:34px;height:34px;border-radius:50%;background:var(--navy);display:grid;place-items:center}
 .brand .mark svg{width:20px;height:20px;stroke:#fff}
 .nav-links{display:flex;gap:4px;flex:1;overflow-x:auto;scrollbar-width:none}
-.nav-links a{padding:8px 12px;border-radius:var(--r-sm);text-decoration:none;color:var(--muted);font-weight:600;font-size:.92rem;white-space:nowrap;display:inline-flex;align-items:center;gap:6px}
+.nav-links a{padding:8px 12px;border-radius:var(--r-sm);text-decoration:none;color:var(--muted);font-weight:500;font-size:.95rem;white-space:nowrap}
 .nav-links a:hover{background:var(--bg);color:var(--navy)}
 .nav-links a.on{color:var(--navy);background:var(--navy-3)}
 .nav-right{display:flex;align-items:center;gap:8px}
-.pill{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:99px;font-size:.78rem;font-weight:700;white-space:nowrap}
+.pill{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:99px;font-size:.78rem;font-weight:600;white-space:nowrap}
 .pill.on{background:var(--green-2);color:var(--green)}
 .pill.off{background:var(--saffron-2);color:#A24E00}
+.pill svg{width:13px;height:13px}
+.dot{width:8px;height:8px;border-radius:50%;background:currentColor;display:inline-block}
 
-/* Bottom Nav for Mobile */
-.bottom-nav{display:none;position:fixed;bottom:0;left:0;right:0;z-index:45;background:#fff;border-top:1px solid var(--line);padding:6px 0}
-.bottom-nav .wrap{display:flex;justify-content:space-around}
-.bottom-nav a{display:flex;flex-direction:column;align-items:center;gap:2px;font-size:.72rem;color:var(--muted);text-decoration:none;font-weight:600;padding:4px 8px;border-radius:var(--r-sm)}
-.bottom-nav a.on{color:var(--navy);background:var(--navy-3)}
-.bottom-nav svg{width:20px;height:20px}
-
-/* ============ Buttons & Input Controls ============ */
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:1.5px solid transparent;border-radius:var(--r-sm);padding:10px 18px;font-weight:600;font-size:.95rem;text-decoration:none;transition:all .15s}
+/* ============ Buttons & fields ============ */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:1.5px solid transparent;border-radius:var(--r-sm);padding:10px 18px;font-weight:600;font-size:.95rem;text-decoration:none;transition:background .15s,border-color .15s}
 .btn svg{width:18px;height:18px}
 .btn.primary{background:var(--navy);color:#fff}
 .btn.primary:hover{background:var(--navy-2)}
@@ -71,112 +68,207 @@ button{font-family:inherit;cursor:pointer}
 .btn.ghost:hover{border-color:var(--navy);background:#fff}
 .btn.danger{background:var(--red-2);color:var(--red)}
 .btn.sm{padding:6px 12px;font-size:.85rem}
-.btn.lg{padding:14px 24px;font-size:1.05rem}
 .btn:disabled{opacity:.5;cursor:not-allowed}
 .field{display:flex;flex-direction:column;gap:6px;margin-bottom:14px}
 .field label{font-weight:600;font-size:.9rem;color:var(--ink)}
-input,select,textarea{font:inherit;padding:11px 13px;border:1.5px solid var(--line);border-radius:var(--r-sm);background:#fff;color:var(--ink);width:100%}
+input,select,textarea{font:inherit;padding:10px 12px;border:1.5px solid var(--line);border-radius:var(--r-sm);background:#fff;color:var(--ink);width:100%}
 input:focus,select:focus,textarea:focus{outline:none;border-color:var(--navy-2);box-shadow:0 0 0 3px var(--navy-3)}
-textarea{resize:vertical;min-height:92px}
+textarea{resize:vertical;min-height:96px}
 .row{display:flex;gap:12px;flex-wrap:wrap}
 .row>*{flex:1;min-width:140px}
 
-/* ============ Core Components & Cards ============ */
-.panel{background:var(--card);border:1px solid var(--line);border-radius:var(--r-md);padding:20px;box-shadow:0 2px 6px rgba(0,0,0,.02)}
-.panel h3{margin-bottom:6px}
-.badge{display:inline-block;padding:3px 10px;border-radius:99px;font-size:.78rem;font-weight:700}
+/* ============ Surfaces ============ */
+.panel{background:var(--card);border:1px solid var(--line);border-radius:var(--r-md);padding:20px}
+.panel h3{margin-bottom:4px}
+.badge{display:inline-block;padding:2px 10px;border-radius:99px;font-size:.78rem;font-weight:700}
 .b-Critical{background:var(--red);color:#fff}
 .b-High{background:var(--saffron-2);color:#A24E00}
 .b-Medium{background:var(--amber-2);color:var(--amber)}
 .b-Low{background:var(--green-2);color:var(--green)}
 .b-queued{background:var(--saffron-2);color:#A24E00}
 .b-synced{background:var(--green-2);color:var(--green)}
+.b-Open{background:var(--navy-3);color:var(--navy)}
+.b-review{background:var(--amber-2);color:var(--amber)}
+.b-Resolved{background:var(--green-2);color:var(--green)}
 
-/* Privacy Status Card */
-.privacy-card{background:linear-gradient(135deg, #0E2A5C, #173F86);color:#fff;border-radius:var(--r-md);padding:18px;margin-bottom:20px}
-.privacy-card h4{color:#fff;margin-bottom:10px;display:flex;align-items:center;gap:8px;font-family:var(--sans);font-size:1rem}
-.privacy-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;font-size:.85rem}
-.privacy-item{background:rgba(255,255,255,.1);padding:8px 12px;border-radius:var(--r-sm);display:flex;justify-content:space-between;align-items:center}
-.privacy-item span{opacity:.9}
-.privacy-item b{font-weight:700}
-
-/* Data Confidence Breakdown */
-.confidence-box{background:var(--bg);border:1.5px solid var(--line);border-radius:var(--r-md);padding:16px;margin:16px 0}
-.confidence-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
-.confidence-score{font-size:1.4rem;font-family:var(--serif);font-weight:700;color:var(--navy);display:flex;align-items:center;gap:6px}
-.confidence-list{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:6px;font-size:.88rem}
-.confidence-list li{display:flex;align-items:center;gap:8px}
-.confidence-list li.check{color:var(--green)}
-.confidence-list li.uncheck{color:var(--muted)}
-
-/* Hero Section */
-.hero{padding:48px 0 56px;background:radial-gradient(800px 400px at 85% -10%,rgba(240,125,26,.12),transparent 60%),#fff;border-bottom:1px solid var(--line)}
-.hero .wrap{display:grid;grid-template-columns:1.1fr .9fr;gap:40px;align-items:center}
-.hero p.lead{font-size:1.1rem;color:var(--muted);margin:16px 0 24px;max-width:54ch}
+/* ============ Hero ============ */
+.hero{padding:56px 0 64px;background:
+  radial-gradient(900px 400px at 85% -10%,rgba(240,125,26,.12),transparent 60%),
+  radial-gradient(700px 400px at -10% 110%,rgba(31,138,76,.10),transparent 60%),#fff;border-bottom:1px solid var(--line)}
+.hero .wrap{display:grid;grid-template-columns:1.1fr .9fr;gap:48px;align-items:center}
+.hero p.lead{font-size:1.12rem;color:var(--muted);margin:18px 0 26px;max-width:52ch}
 .hero .cta{display:flex;gap:12px;flex-wrap:wrap}
-.principle-banner{background:var(--saffron-2);border-left:4px solid var(--saffron);padding:12px 16px;border-radius:var(--r-sm);font-weight:600;color:#8A4000;margin-bottom:16px;display:flex;align-items:center;gap:10px}
+.hero .track{margin-top:26px;font-size:.88rem;color:var(--muted)}
+.hero .facts{display:flex;gap:28px;margin-top:30px;flex-wrap:wrap}
+.hero .facts div{border-left:3px solid var(--saffron);padding-left:12px}
+.hero .facts b{display:block;font-family:var(--serif);font-size:1.5rem;color:var(--navy)}
+.hero .facts span{font-size:.82rem;color:var(--muted)}
+.demo{background:var(--navy);border-radius:var(--r-lg);padding:22px;color:#fff;box-shadow:0 24px 50px -24px rgba(14,42,92,.6)}
+.demo .bar{display:flex;justify-content:space-between;align-items:center;font-size:.8rem;opacity:.85;margin-bottom:16px}
+.demo .consent{background:rgba(255,255,255,.1);border-radius:var(--r-sm);padding:10px 12px;font-size:.85rem;margin-bottom:18px;display:flex;justify-content:space-between;gap:10px;align-items:center}
+.switch{width:38px;height:22px;border-radius:99px;background:rgba(255,255,255,.3);position:relative;flex:none}
+.switch::after{content:"";position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:#fff}
+.demo .mic{width:64px;height:64px;border-radius:50%;background:var(--saffron);display:grid;place-items:center;margin:0 auto 14px}
+.demo .mic svg{width:28px;height:28px;stroke:#fff}
+.demo .mic.live{animation:pulse 1.4s infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(240,125,26,.6)}100%{box-shadow:0 0 0 22px rgba(240,125,26,0)}}
+.demo .said{min-height:52px;text-align:center;font-size:1.05rem;margin-bottom:16px}
+.demo .rec{background:#fff;color:var(--ink);border-radius:var(--r-md);padding:14px 16px;transition:opacity .4s}
+.demo .rec dl{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;margin:0 0 10px;font-size:.92rem}
+.demo .rec dt{color:var(--muted)}
+.demo .rec dd{margin:0;font-weight:600}
+.demo .rec .st{font-size:.82rem;font-weight:600;color:#A24E00;background:var(--saffron-2);padding:5px 10px;border-radius:var(--r-sm)}
 
-/* Page Layouts */
-.page{padding:28px 0 64px;min-height:72vh}
-.page-head{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:20px}
-.cols{display:grid;grid-template-columns:440px 1fr;gap:20px;align-items:start}
+/* ============ Sections ============ */
+section.block{padding:64px 0}
+section.block.alt{background:#fff;border-block:1px solid var(--line)}
+.sec-head{max-width:640px;margin-bottom:30px}
+.sec-head p{color:var(--muted);margin-top:8px}
+.grid2{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.problem{border-radius:var(--r-md);padding:20px;border:1px solid var(--line)}
+.problem h3{margin-bottom:6px}
+.problem p{color:var(--muted);font-size:.95rem}
+.p1{background:#FBE9DB}.p2{background:#E1E8F6}.p3{background:#EDEEF1}.p4{background:#E3F1E7}
+.steps{display:grid;grid-template-columns:repeat(5,1fr);gap:0;counter-reset:s}
+.step{padding:18px 18px 18px 0;position:relative}
+.step::before{counter-increment:s;content:counter(s);display:grid;place-items:center;width:34px;height:34px;border-radius:50%;background:var(--navy);color:#fff;font-weight:700;margin-bottom:12px;position:relative;z-index:1}
+.step::after{content:"";position:absolute;top:34px;left:34px;right:0;height:2px;background:repeating-linear-gradient(90deg,var(--saffron) 0 8px,transparent 8px 14px)}
+.step:last-child::after{display:none}
+.step h4{font-family:var(--sans);font-size:1rem;color:var(--ink);margin-bottom:4px}
+.step p{font-size:.9rem;color:var(--muted)}
+.privacy{display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:center}
+.privacy ul{margin:16px 0 0;padding-left:20px;color:var(--muted)}
+.privacy li{margin-bottom:8px}
+.privacy li b{color:var(--ink)}
+.callout{background:var(--navy);color:#fff;border-radius:var(--r-lg);padding:28px}
+.callout h3{color:#fff;margin-bottom:8px}
+.callout p{opacity:.9}
+
+/* ============ Page shells ============ */
+.page{padding:32px 0 56px;min-height:70vh}
+.page-head{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:22px}
+.page-head p{color:var(--muted);margin-top:4px}
+.cols{display:grid;grid-template-columns:420px 1fr;gap:20px;align-items:start}
 .cols.even{grid-template-columns:1fr 1fr}
+.cols.wide{grid-template-columns:1fr 380px}
 .stack{display:flex;flex-direction:column;gap:16px}
-.tabs{display:flex;gap:4px;background:#fff;border:1px solid var(--line);border-radius:var(--r-sm);padding:4px;margin-bottom:16px;width:fit-content;max-width:100%;overflow-x:auto}
+.tabs{display:flex;gap:4px;background:#fff;border:1px solid var(--line);border-radius:var(--r-sm);padding:4px;margin-bottom:18px;width:fit-content;max-width:100%;overflow-x:auto}
 .tabs button{border:0;background:transparent;padding:8px 16px;border-radius:6px;font-weight:600;color:var(--muted);white-space:nowrap}
 .tabs button.on{background:var(--navy);color:#fff}
 
-/* Voice Interface */
-.voice-box{text-align:center;padding:16px;background:var(--bg);border-radius:var(--r-md);border:1.5px dashed var(--line);margin-bottom:16px}
-.micbtn{width:88px;height:88px;border-radius:50%;border:0;background:var(--saffron);display:grid;place-items:center;margin:0 auto 12px;box-shadow:0 8px 20px -6px rgba(240,125,26,.8);transition:transform .15s}
-.micbtn:hover{transform:scale(1.04)}
-.micbtn svg{width:38px;height:38px;stroke:#fff}
+/* consent */
+.consent-box{border:1.5px solid var(--line);border-radius:var(--r-md);padding:14px 16px;display:flex;gap:14px;align-items:flex-start;background:var(--bg)}
+.consent-box.on{border-color:var(--green);background:var(--green-2)}
+.consent-box .txt{flex:1;font-size:.9rem}
+.consent-box .txt b{display:block;font-size:1rem;margin-bottom:2px}
+.toggle{width:52px;height:30px;border-radius:99px;border:0;background:#B8BFCE;position:relative;flex:none;transition:background .2s}
+.toggle::after{content:"";position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:#fff;transition:transform .2s}
+.toggle.on{background:var(--green)}
+.toggle.on::after{transform:translateX(22px)}
+
+/* voice */
+.voice{text-align:center;padding:8px 0 4px}
+.micbtn{width:96px;height:96px;border-radius:50%;border:0;background:var(--saffron);display:grid;place-items:center;margin:0 auto 10px;box-shadow:0 10px 24px -10px rgba(240,125,26,.9)}
+.micbtn svg{width:40px;height:40px;stroke:#fff}
 .micbtn.live{animation:pulse 1.3s infinite;background:var(--red)}
-@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(198,40,40,.6)}100%{box-shadow:0 0 0 22px rgba(198,40,40,0)}}
+.transcript{min-height:56px;padding:10px 14px;background:var(--bg);border-radius:var(--r-sm);font-size:1.02rem;text-align:left;border:1.5px dashed var(--line)}
+.parsed{border:1.5px solid var(--navy-3);border-radius:var(--r-md);padding:14px;background:#fff}
+.parsed .src{font-size:.75rem;color:var(--muted);margin-bottom:8px}
+.photo-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.thumb{width:72px;height:72px;object-fit:cover;border-radius:var(--r-sm);border:1px solid var(--line)}
+.map{width:100%;border-radius:var(--r-md);border:1px solid var(--line);z-index:0}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:.8rem;color:var(--muted);margin-top:8px}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px}
+.timeline{list-style:none;margin:0;padding:0}
+.timeline li{display:flex;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)}
+.timeline li:last-child{border:0}
+.timeline .when{width:96px;flex:none;font-size:.8rem;color:var(--muted)}
+.timeline .what{flex:1;min-width:0}
+.timeline .what b{display:block}
 
-/* Scheme Cards */
-.scheme-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:16px}
-.scheme-card{background:#fff;border:1px solid var(--line);border-radius:var(--r-md);padding:18px;display:flex;flex-direction:column;justify-content:space-between}
-.scheme-card h4{font-family:var(--sans);font-size:1.05rem;color:var(--navy);margin-bottom:6px}
-.scheme-tag{font-size:.78rem;font-weight:700;color:var(--navy-2);background:var(--navy-3);padding:2px 8px;border-radius:4px;width:fit-content;margin-bottom:8px}
+/* tables & stats */
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:18px}
+.kpi{background:#fff;border:1px solid var(--line);border-radius:var(--r-md);padding:16px 18px;border-left:4px solid var(--navy)}
+.kpi:nth-child(2){border-left-color:var(--green)}
+.kpi:nth-child(3){border-left-color:var(--saffron)}
+.kpi:nth-child(4){border-left-color:var(--red)}
+.kpi b{font-family:var(--serif);font-size:1.9rem;color:var(--navy);display:block;line-height:1.1}
+.kpi span{font-size:.85rem;color:var(--muted)}
+.tbl-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:var(--r-md);background:#fff}
+table{border-collapse:collapse;width:100%;font-size:.9rem}
+th,td{text-align:left;padding:10px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+th{background:var(--bg);font-weight:600;color:var(--muted);font-size:.82rem;white-space:nowrap}
+tr:last-child td{border-bottom:0}
+.bars .b{display:grid;grid-template-columns:110px 1fr 30px;gap:10px;align-items:center;font-size:.86rem;margin:7px 0}
+.bars .track{height:10px;background:var(--bg);border-radius:99px;overflow:hidden}
+.bars .fill{height:100%;background:var(--navy-2);border-radius:99px}
+.bars.g .fill{background:var(--green)}
+.empty{text-align:center;padding:28px 12px;color:var(--muted)}
 
-/* Read Aloud Button */
-.read-aloud-btn{display:inline-flex;align-items:center;gap:6px;background:var(--navy-3);color:var(--navy);border:none;padding:5px 10px;border-radius:99px;font-size:.8rem;font-weight:600;cursor:pointer;margin-top:6px}
-.read-aloud-btn:hover{background:var(--navy);color:#fff}
+/* login */
+.login{max-width:460px;margin:0 auto}
+.hint{background:var(--amber-2);color:#6B4700;border-radius:var(--r-sm);padding:10px 12px;font-size:.85rem;margin-bottom:14px}
+.err{color:var(--red);font-size:.85rem;margin:-6px 0 10px}
 
-/* Floating Ask Assistant Button */
-.ask-fab{position:fixed;right:22px;bottom:22px;z-index:60;background:var(--navy);color:#fff;border:none;border-radius:99px;padding:12px 20px;font-weight:700;font-size:.95rem;display:flex;align-items:center;gap:8px;box-shadow:0 10px 25px -5px rgba(14,42,92,.6)}
-.ask-fab svg{width:22px;height:22px}
-
-/* Chat Assistant Drawer */
-.chat-drawer{position:fixed;right:20px;bottom:85px;z-index:60;width:min(400px,calc(100vw - 32px));height:min(560px,calc(100vh - 120px));background:#fff;border:1px solid var(--line);border-radius:var(--r-md);display:flex;flex-direction:column;box-shadow:0 20px 50px -15px rgba(14,42,92,.5);overflow:hidden}
-.chat-drawer header{background:var(--navy);color:#fff;padding:14px 16px;display:flex;justify-content:space-between;align-items:center}
-.chat-drawer .msgs{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:10px;background:var(--bg)}
-.msg{max-width:88%;padding:10px 14px;border-radius:14px;font-size:.92rem;line-height:1.45}
+/* chat */
+.chat-fab{position:fixed;right:20px;bottom:20px;z-index:60;width:58px;height:58px;border-radius:50%;border:0;background:var(--navy);color:#fff;display:grid;place-items:center;box-shadow:0 12px 28px -8px rgba(14,42,92,.7)}
+.chat-fab svg{width:26px;height:26px}
+.chat{position:fixed;right:20px;bottom:90px;z-index:60;width:min(380px,calc(100vw - 32px));height:min(540px,calc(100vh - 120px));background:#fff;border:1px solid var(--line);border-radius:var(--r-md);display:flex;flex-direction:column;box-shadow:0 24px 60px -20px rgba(14,42,92,.5);overflow:hidden}
+.chat header{background:var(--navy);color:#fff;padding:12px 14px;display:flex;justify-content:space-between;align-items:center}
+.chat header b{font-family:var(--serif)}
+.chat header button{background:none;border:0;color:#fff;display:grid}
+.chat header svg{width:20px;height:20px}
+.msgs{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:10px;background:var(--bg)}
+.msg{max-width:86%;padding:9px 12px;border-radius:14px;font-size:.92rem;white-space:pre-wrap;word-wrap:break-word}
 .msg.bot{background:#fff;border:1px solid var(--line);align-self:flex-start;border-bottom-left-radius:4px}
 .msg.me{background:var(--navy);color:#fff;align-self:flex-end;border-bottom-right-radius:4px}
+.chips{display:flex;gap:6px;flex-wrap:wrap;padding:0 14px 10px;background:var(--bg)}
+.chips button{border:1px solid var(--line);background:#fff;border-radius:99px;padding:5px 11px;font-size:.78rem;color:var(--navy)}
+.chat form{display:flex;gap:8px;padding:10px;border-top:1px solid var(--line)}
+.chat form input{flex:1}
 
-/* Modals & Toasts */
-.overlay{position:fixed;inset:0;background:rgba(10,20,45,.6);z-index:80;display:grid;place-items:center;padding:16px}
-.modal{background:#fff;border-radius:var(--r-md);padding:22px;width:min(500px,100%);max-height:92vh;overflow:auto}
+/* modal & toast */
+.overlay{position:fixed;inset:0;background:rgba(10,20,45,.55);z-index:80;display:grid;place-items:center;padding:16px}
+.modal{background:#fff;border-radius:var(--r-md);padding:22px;width:min(480px,100%);max-height:92vh;overflow:auto}
+.modal h3{margin-bottom:12px}
+.modal .acts{display:flex;gap:10px;justify-content:flex-end;margin-top:8px;flex-wrap:wrap}
+video.cam{width:100%;border-radius:var(--r-sm);background:#000;max-height:60vh}
 .toasts{position:fixed;left:20px;bottom:20px;z-index:90;display:flex;flex-direction:column;gap:8px;max-width:calc(100vw - 100px)}
 .toast{background:var(--ink);color:#fff;padding:10px 16px;border-radius:var(--r-sm);font-size:.9rem;box-shadow:0 8px 20px -8px rgba(0,0,0,.5)}
 
-/* Footer */
-footer.gov{background:var(--navy);color:#DCE5F5;padding:48px 0 28px;margin-top:40px}
+/* footer */
+footer.gov{background:var(--navy);color:#DCE5F5;padding:48px 0 28px;margin-top:0}
 footer.gov h3{color:#fff;margin-bottom:14px}
-.helplines{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px;margin-bottom:30px}
+.helplines{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px;margin-bottom:34px}
 .hl{background:rgba(255,255,255,.08);border-radius:var(--r-sm);padding:12px 14px;border-left:3px solid var(--saffron)}
-.hl b{display:block;font-family:var(--serif);font-size:1.3rem;color:#fff}
+.hl b{display:block;font-family:var(--serif);font-size:1.35rem;color:#fff}
 .hl a{color:#fff;text-decoration:none}
-.links{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:8px 24px;margin-bottom:24px}
-.links a{color:#DCE5F5;text-decoration:none;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.14);font-size:.9rem;display:flex;justify-content:space-between}
+.hl span{font-size:.82rem;opacity:.85}
+.links{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:8px 24px;margin-bottom:28px}
+.links a{color:#DCE5F5;text-decoration:none;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.14);font-size:.92rem;display:flex;justify-content:space-between;gap:8px}
+.links a:hover{color:#fff;border-color:var(--saffron)}
+.links a span{opacity:.6;font-size:.8rem}
+.disclaimer{font-size:.8rem;opacity:.75;max-width:80ch}
 
-@media (max-width:900px){
-  .hero .wrap,.cols,.cols.even{grid-template-columns:1fr}
-  .bottom-nav{display:block}
-  body{padding-bottom:60px}
+/* ============ Responsive ============ */
+@media (max-width:980px){
+  .hero .wrap,.privacy,.cols,.cols.even,.cols.wide{grid-template-columns:1fr}
+  .grid4,.kpis{grid-template-columns:repeat(2,1fr)}
+  .grid3{grid-template-columns:1fr 1fr}
+  .steps{grid-template-columns:1fr}
+  .step{padding:0 0 18px 50px}
+  .step::before{position:absolute;left:0;top:0}
+  .step::after{top:34px;left:16px;right:auto;bottom:0;width:2px;height:auto;background:repeating-linear-gradient(180deg,var(--saffron) 0 8px,transparent 8px 14px)}
 }
+@media (max-width:620px){
+  .grid2,.grid3,.grid4,.kpis{grid-template-columns:1fr}
+  .nav .wrap{height:auto;padding-top:10px;padding-bottom:10px;flex-wrap:wrap}
+  .nav-links{order:3;flex-basis:100%}
+  .timeline .when{width:70px}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
 </style>
 </head>
 <body>
@@ -191,36 +283,31 @@ footer.gov h3{color:#fff;margin-bottom:14px}
 const { useState, useEffect, useRef, useCallback, useMemo } = React;
 
 /* =====================================================================
-   Small Utilities
+   CONFIG — Gemini
+   Do NOT paste a real key here if this file will ever go to GitHub.
+   Use the in-app "AI settings" button instead (stored only in this browser).
+   ===================================================================== */
+const GEMINI_API_KEY = "";               // optional; leave empty and use AI settings
+const GEMINI_MODEL_DEFAULT = "gemini-2.5-flash";
+
+/* =====================================================================
+   Small utilities
    ===================================================================== */
 const uid = () => (crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).slice(2) + Date.now().toString(36));
 const esc = (s) => String(s ?? "").replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
 const fmtTime = (t) => new Date(t).toLocaleString("en-IN", { day:"numeric", month:"short", hour:"2-digit", minute:"2-digit" });
-const net = { forced: false };
+const getSettings = () => { try { return JSON.parse(localStorage.getItem("ss_settings") || "{}"); } catch { return {}; } };
+const net = { forced: false };                                   // "simulate offline" switch
 const isOnline = () => navigator.onLine && !net.forced;
-
-const speak = (text, lang = "hi-IN") => {
-  try {
-    if ('speechSynthesis' in window) {
-      window.speechSynthesis.cancel();
-      const u = new SpeechSynthesisUtterance(text);
-      u.lang = lang;
-      window.speechSynthesis.speak(u);
-    }
-  } catch (e) {
-    console.warn("Speech error:", e);
-  }
-};
+const parseJSON = (t) => JSON.parse(String(t).replace(/```json|```/g, "").trim());
+const speak = (text, lang) => { try { const u = new SpeechSynthesisUtterance(text); u.lang = lang; speechSynthesis.speak(u); } catch {} };
 
 /* =====================================================================
-   IndexedDB Offline Storage
+   IndexedDB  — offline cache (queue) + mock eShram "server" (checkins)
    ===================================================================== */
 const openDB = () => new Promise((res, rej) => {
-  const r = indexedDB.open("shram-sanchar-v2", 1);
-  r.onupgradeneeded = () => {
-    const d = r.result;
-    ["queue","checkins","complaints"].forEach(s => { if (!d.objectStoreNames.contains(s)) d.createObjectStore(s, { keyPath:"id" }); });
-  };
+  const r = indexedDB.open("shram-sanchar", 1);
+  r.onupgradeneeded = () => { const d = r.result; ["queue","checkins","complaints"].forEach(s => { if (!d.objectStoreNames.contains(s)) d.createObjectStore(s, { keyPath:"id" }); }); };
   r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error);
 });
 let _db; const getDB = () => _db || (_db = openDB());
@@ -238,108 +325,182 @@ const DB = {
   del: (s, id) => tx(s, "readwrite", st => st.delete(id)),
 };
 
+/* Sync engine — in production this is the Node/Express endpoint that dedupes and
+   forwards to eShram's data-sharing API. Here it moves items from queue to "server". */
 async function syncQueue() {
   if (!isOnline()) return 0;
   const q = await DB.all("queue"); let n = 0;
   for (const item of q) {
-    const exists = await DB.get("checkins", item.id);
-    if (!exists) {
-      // Call mock eShram server endpoint
-      try {
-        await fetch('/api/eshram/mobility-update', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(item)
-        });
-      } catch (e) {}
-      await DB.put("checkins", { ...item, status:"synced", syncedAt:Date.now() });
-      n++;
-    }
+    const exists = await DB.get("checkins", item.id);           // dedupe by id
+    if (!exists) { await DB.put("checkins", { ...item, status:"synced", syncedAt:Date.now() }); n++; }
     await DB.del("queue", item.id);
   }
   return n;
 }
 
 /* =====================================================================
-   Backend API Calls (Gemini Integration)
+   Gemini & Backend APIs
    ===================================================================== */
-async function callAiAssistant(prompt, history = [], user = null, lang = 'hi-IN') {
+async function gemini({ system, contents, json = false }) {
+  // First try secure server-side API endpoint
   try {
-    const res = await fetch('/api/ai/assistant', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ prompt, history, user, lang })
-    });
-    if (!res.ok) throw new Error('API server error');
-    const data = await res.json();
-    return data.reply || "Sorry, I could not generate an answer right now.";
-  } catch (e) {
-    return "Call eShram helpline 14434 or try again when online.";
-  }
-}
+    const promptText = contents?.[contents.length - 1]?.parts?.[0]?.text || "";
+    if (json && system?.includes("triage grievances")) {
+      // Priority check call
+      const res = await fetch('/api/ai/assistant', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt: `System: ${system}\n\nUser text: ${promptText}` })
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.reply) return data.reply;
+      }
+    } else {
+      const res = await fetch('/api/ai/assistant', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt: promptText, history: contents.slice(0, -1) })
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.reply) return data.reply;
+      }
+    }
+  } catch (e) {}
 
-async function callExtractIntent(text) {
-  try {
-    const res = await fetch('/api/ai/extract-intent', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ text })
-    });
-    const data = await res.json();
-    return data.data;
-  } catch (e) {
-    return {
-      intent: "MOBILITY_UPDATE",
-      destination: "Unspecified Location",
-      occupation: "Unspecified Work",
-      status: "Traveling",
-      confidence: 0.65
-    };
-  }
-}
-
-async function callRecommendScheme(text) {
-  try {
-    const res = await fetch('/api/ai/recommend-scheme', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ text })
-    });
-    const data = await res.json();
-    return data.data;
-  } catch (e) {
-    return { category: "Financial Support", explanation: "Default category", suggested_schemes: [] };
-  }
+  // Fallback to client key if set in browser
+  const s = getSettings(); const key = s.geminiKey || GEMINI_API_KEY;
+  if (!key) throw new Error("NO_KEY");
+  if (!isOnline()) throw new Error("OFFLINE");
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${s.model || GEMINI_MODEL_DEFAULT}:generateContent`;
+  const body = { contents, generationConfig: { temperature: json ? 0.1 : 0.6, ...(json ? { responseMimeType:"application/json" } : {}) } };
+  if (system) body.systemInstruction = { parts:[{ text: system }] };
+  const r = await fetch(url, { method:"POST", headers:{ "Content-Type":"application/json", "x-goog-api-key": key }, body: JSON.stringify(body) });
+  if (!r.ok) throw new Error("Gemini " + r.status);
+  const d = await r.json();
+  return (d.candidates?.[0]?.content?.parts || []).map(p => p.text || "").join("");
 }
 
 /* =====================================================================
-   Data Confidence Score Calculator
+   Places, extraction, priority (Gemini first, on-device fallback)
    ===================================================================== */
-function calculateDataConfidence({ workerConfirmed, locationAvailable, aiExtracted, userModified, validTimestamp }) {
-  let score = 0;
-  const breakdown = [];
+const CITIES = [
+ ["Delhi","DL",28.6139,77.2090,["दिल्ली","new delhi"]],["Mumbai","MH",19.0760,72.8777,["मुंबई","bombay"]],
+ ["Pune","MH",18.5204,73.8567,["पुणे"]],["Ahmedabad","GJ",23.0225,72.5714,["अहमदाबाद"]],
+ ["Surat","GJ",21.1702,72.8311,["सूरत","સુરત"]],["Vadodara","GJ",22.3072,73.1812,["वडोदरा","baroda"]],
+ ["Rajkot","GJ",22.3039,70.8022,["राजकोट"]],["Bengaluru","KA",12.9716,77.5946,["बेंगलुरु","bangalore","बैंगलोर"]],
+ ["Hyderabad","TS",17.3850,78.4867,["हैदराबाद"]],["Chennai","TN",13.0827,80.2707,["चेन्नई","madras"]],
+ ["Coimbatore","TN",11.0168,76.9558,["कोयंबटूर"]],["Kolkata","WB",22.5726,88.3639,["कोलकाता","calcutta"]],
+ ["Jaipur","RJ",26.9124,75.7873,["जयपुर"]],["Jodhpur","RJ",26.2389,73.0243,["जोधपुर"]],
+ ["Lucknow","UP",26.8467,80.9462,["लखनऊ"]],["Kanpur","UP",26.4499,80.3319,["कानपुर"]],
+ ["Varanasi","UP",25.3176,82.9739,["वाराणसी","banaras"]],["Agra","UP",27.1767,78.0081,["आगरा"]],
+ ["Noida","UP",28.5355,77.3910,["नोएडा"]],["Gurugram","HR",28.4595,77.0266,["गुड़गांव","गुरुग्राम","gurgaon"]],
+ ["Patna","BR",25.5941,85.1376,["पटना"]],["Indore","MP",22.7196,75.8577,["इंदौर"]],
+ ["Pithampur","MP",22.6136,75.6970,["पीथमपुर"]],["Bhopal","MP",23.2599,77.4126,["भोपाल"]],
+ ["Nagpur","MH",21.1458,79.0882,["नागपुर"]],["Thane","MH",19.2183,72.9781,["ठाणे"]],["Nashik","MH",19.9975,73.7898,["नाशिक"]],
+ ["Ludhiana","PB",30.9010,75.8573,["लुधियाना"]],["Chandigarh","CH",30.7333,76.7794,["चंडीगढ़"]],
+ ["Bhubaneswar","OD",20.2961,85.8245,["भुवनेश्वर"]],["Ranchi","JH",23.3441,85.3096,["रांची"]],
+ ["Raipur","CG",21.2514,81.6296,["रायपुर"]],["Guwahati","AS",26.1445,91.7362,["गुवाहाटी"]],
+ ["Kochi","KL",9.9312,76.2673,["कोच्चि","cochin"]],["Visakhapatnam","AP",17.6868,83.2185,["विशाखापत्तनम","vizag"]],
+];
+const findCity = (text) => {
+  const t = (text || "").toLowerCase();
+  for (const c of CITIES) if (t.includes(c[0].toLowerCase()) || c[4].some(a => t.includes(a.toLowerCase()))) return { name:c[0], state:c[1], lat:c[2], lng:c[3] };
+  return null;
+};
+async function resolveDestination(name) {
+  if (!name) return null;
+  const c = findCity(name); if (c) return c;
+  if (!isOnline()) return null;
+  try {
+    const ctl = new AbortController(); const to = setTimeout(() => ctl.abort(), 5000);
+    const r = await fetch("https://nominatim.openstreetmap.org/search?format=json&limit=1&addressdetails=1&countrycodes=in&q=" + encodeURIComponent(name), { signal: ctl.signal });
+    clearTimeout(to); const j = await r.json();
+    if (j[0]) return { name: j[0].display_name.split(",")[0], state: j[0].address?.state || "", lat:+j[0].lat, lng:+j[0].lon };
+  } catch {}
+  return null;
+}
 
-  if (workerConfirmed) { score += 30; breakdown.push({ text: "Worker confirmed information", val: "+30", pass: true }); }
-  else { breakdown.push({ text: "Worker confirmed information", val: "0", pass: false }); }
+const JOBS = [
+ ["Construction", /construct|mason|mistri|building|site work|निर्माण|मिस्त्री|राजमिस्त्री|इमारत/i],
+ ["Factory work", /factory|company|plant|कारखाना|फैक्ट्री|फैक्टरी|कंपनी/i],
+ ["Agriculture", /farm|harvest|kheti|crop|खेती|कटाई|फसल|खेत/i],
+ ["Domestic work", /maid|domestic|housework|घरेलू|घर का काम/i],
+ ["Delivery / Driving", /deliver|driver|truck|rickshaw|ड्राइवर|डिलीवरी|ट्रक/i],
+ ["Hospitality", /hotel|restaurant|dhaba|cook|होटल|ढाबा|रसोई/i],
+ ["Textile", /textile|weav|powerloom|garment|कपड़ा|बुनाई/i],
+ ["Mining / Quarry", /mine|mining|quarry|खदान|खनन/i],
+ ["Security", /guard|security|चौकीदार|गार्ड/i],
+];
+const INTENT = { traveling:"Traveling", arrived:"Arrived", returning_home:"Returning home", seeking_work:"Seeking work", other:"Other" };
+const INTENT_COLOR = { traveling:"#F07D1A", arrived:"#1F8A4C", returning_home:"#0E2A5C", seeking_work:"#8E44AD", other:"#7A8194" };
+function localExtract(text) {
+  const city = findCity(text); const job = (JOBS.find(j => j[1].test(text)) || [])[0] || "";
+  let intent = "traveling";
+  if (/return|going home|back home|wapas|वापस|घर जा|गांव|गाँव|village/i.test(text)) intent = "returning_home";
+  else if (/reached|arrived|pahunch|पहुँच|पहुंच|आ गया|आ गई/i.test(text)) intent = "arrived";
+  else if (/looking for|need work|need a job|काम चाहिए|काम ढूं|काम की तलाश/i.test(text)) intent = "seeking_work";
+  return { destination: city ? city.name : "", state: city ? city.state : "", job_type: job, intent, summary: text.slice(0, 140) };
+}
+const EXTRACT_SYS = `You convert a migrant worker's spoken status (any Indian language or English) into JSON with keys:
+destination (city name in English, "" if none), state (2-letter Indian state code, "" if unknown), job_type (English, e.g. Construction, Factory work, Agriculture, Domestic work, Delivery / Driving, Hospitality, Textile, Mining / Quarry, Security, Other),
+intent (one of: traveling, arrived, returning_home, seeking_work, other), summary (one short English sentence). Return JSON only.`;
 
-  if (locationAvailable) { score += 25; breakdown.push({ text: "Location available (GPS consent)", val: "+25", pass: true }); }
-  else { breakdown.push({ text: "Location unavailable (Manual report)", val: "0", pass: false }); }
+const PRIORITY_SYS = `You triage grievances filed by migrant workers for a labour department. Return JSON only with keys:
+priority ("Critical" | "High" | "Medium" | "Low"), reason (one short English sentence), department (who should handle it), action (one concrete next step for the officer).
+Critical = threat to life or safety, violence, bonded labour, trafficking, confinement, serious injury or death. High = unpaid wages, unsafe conditions, harassment, eviction, no food or shelter. Medium = eShram/UAN card issues, benefits access, document problems. Low = general questions or feedback.`;
 
-  if (aiExtracted) { score += 20; breakdown.push({ text: "AI intent successfully extracted", val: "+20", pass: true }); }
-  else { breakdown.push({ text: "AI intent extracted", val: "0", pass: false }); }
-
-  if (userModified !== undefined) {
-    score += 15;
-    breakdown.push({ text: "Worker reviewed AI interpretation", val: "+15", pass: true });
-  }
-
-  if (validTimestamp) { score += 10; breakdown.push({ text: "Valid timestamp & device verified", val: "+10", pass: true }); }
-
-  return { score: Math.min(score, 100), breakdown };
+function localPriority(text, category) {
+  const t = (text + " " + category).toLowerCase();
+  const crit = /beat|violen|threat|trapped|locked|bonded|captive|rape|abus|died|death|fatal|accident|injur|child labo|traffick|confiscat|हिंसा|मारपीट|धमकी|बंधक|दुर्घटना|मौत/;
+  const high = /not paid|unpaid|no wage|wage|salary|harass|unsafe|no food|evict|thrown out|fired|मजदूरी|वेतन|पैसे नहीं|भूखे|निकाल|accommodation|shelter/;
+  const med = /card|uan|e-?shram|document|benefit|scheme|registration|update|कार्ड/;
+  if (crit.test(t)) return { priority:"Critical", reason:"Mentions a possible threat to safety or life.", department:"Police (112) + District Labour Officer", action:"Call the worker immediately and coordinate with local police.", source:"On-device rules" };
+  if (high.test(t)) return { priority:"High", reason:"Wage, safety or shelter issue affecting the worker's livelihood.", department:"Labour Enforcement Officer", action:"Contact employer and record a statement within 48 hours.", source:"On-device rules" };
+  if (med.test(t)) return { priority:"Medium", reason:"Registration or benefits issue.", department:"eShram helpdesk", action:"Verify UAN details and guide the worker through the fix.", source:"On-device rules" };
+  return { priority:"Low", reason:"General query or feedback.", department:"Help desk", action:"Reply with information.", source:"On-device rules" };
+}
+async function checkPriority(text, category) {
+  try {
+    const t = await gemini({ system: PRIORITY_SYS, json:true, contents:[{ role:"user", parts:[{ text:`Category: ${category}\nComplaint: ${text}` }] }] });
+    const j = parseJSON(t);
+    if (!["Critical","High","Medium","Low"].includes(j.priority)) throw new Error("bad");
+    return { priority:j.priority, reason:j.reason || "", department:j.department || "", action:j.action || "", source:"Gemini" };
+  } catch { return localPriority(text, category); }
 }
 
 /* =====================================================================
-   App Router & Global State
+   Seed demo data (so the admin dashboard is not empty on first run)
+   ===================================================================== */
+async function seed() {
+  if (localStorage.getItem("ss_seeded")) return;
+  const people = ["Ramesh Kumar","Sunita Devi","Mohd. Arif","Lakshmi P.","Bhola Oraon","Geeta Bai","Sanjay Yadav","Anita Munda","Karthik R.","Pooja Kumari","Vikram Singh","Rekha Sahu","Imran Ansari","Meena Kumari"];
+  const plan = [["Surat","Construction","traveling"],["Pune","Factory work","arrived"],["Gurugram","Construction","arrived"],["Bengaluru","Delivery / Driving","seeking_work"],["Mumbai","Construction","traveling"],
+    ["Surat","Textile","arrived"],["Noida","Factory work","traveling"],["Patna","Agriculture","returning_home"],["Jaipur","Hospitality","arrived"],["Chennai","Factory work","traveling"],
+    ["Pithampur","Factory work","arrived"],["Delhi","Domestic work","seeking_work"],["Ranchi","Agriculture","returning_home"],["Ahmedabad","Construction","arrived"]];
+  for (let i = 0; i < plan.length; i++) {
+    const c = findCity(plan[i][0]); const t = Date.now() - Math.floor(Math.random() * 72) * 3600e3;
+    await DB.put("checkins", { id:"seed-c" + i, uan:"1000000000" + String(10 + i), name:people[i], destination:c.name, state:c.state,
+      lat:+(c.lat + (Math.random() - .5) * .08).toFixed(2), lng:+(c.lng + (Math.random() - .5) * .08).toFixed(2), gps:null,
+      jobType:plan[i][1], intent:plan[i][2], transcript:"", lang:"hi-IN", photo:null, consent:true, createdAt:t, status:"synced", syncedAt:t, demo:true });
+  }
+  const cs = [
+   ["Wages unpaid","Contractor has not paid us for 3 months and now says he will not pay at all.","Surat, GJ","High","Multi-month wage theft affects livelihood.","Labour Enforcement Officer","Open"],
+   ["Unsafe working conditions","A worker fell from scaffolding and was injured. No helmets or harness are provided at the site.","Gurugram, HR","Critical","Serious injury and unsafe site.","Police (112) + District Labour Officer","In review"],
+   ["eShram card / UAN issue","My UAN card shows the old address and I cannot update it.","Patna, BR","Medium","Registration update issue.","eShram helpdesk","Open"],
+   ["Harassment","Supervisor shouts and threatens to remove us if we ask for a day off.","Pune, MH","High","Workplace harassment and threats.","Labour Enforcement Officer","Open"],
+   ["Other","How can I get the accident insurance benefit under eShram?","Jaipur, RJ","Low","General benefits query.","Help desk","Resolved"]];
+  for (let i = 0; i < cs.length; i++) {
+    const c = cs[i];
+    await DB.put("complaints", { id:"SS-2026-" + (1101 + i), uan:"1000000000" + String(10 + i), name:people[i], category:c[0], description:c[1], location:c[2], photo:null,
+      createdAt:Date.now() - (i + 1) * 5 * 3600e3, status:c[6], priority:c[3], reason:c[4], department:c[5], action:"", source:"Seed", demo:true });
+  }
+  localStorage.setItem("ss_seeded", "1");
+}
+
+/* =====================================================================
+   App context, hash router
    ===================================================================== */
 const AppCtx = React.createContext();
 const useApp = () => React.useContext(AppCtx);
@@ -348,6 +509,7 @@ const go = (r) => { location.hash = "#/" + r; window.scrollTo({ top:0 }); };
 
 const PATHS = {
   mic:'<path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/>',
+  camera:'<path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/>',
   pin:'<path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>',
   shield:'<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>',
   send:'<line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>',
@@ -355,819 +517,628 @@ const PATHS = {
   chat:'<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>',
   wifioff:'<line x1="1" y1="1" x2="23" y2="23"/><path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55"/><path d="M5 12.55a10.94 10.94 0 0 1 5.17-2.39"/><path d="M10.71 5.05A16 16 0 0 1 22.58 9"/><path d="M1.42 9a15.91 15.91 0 0 1 4.7-2.88"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/>',
   wifi:'<path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/>',
-  volume:'<polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/>',
-  help:'<circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/>',
-  building:'<path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/><path d="M6 12H4a2 2 0 0 0-2 2v8h20v-8a2 2 0 0 0-2-2h-2"/><path d="M10 6h4"/><path d="M10 10h4"/><path d="M10 14h4"/><path d="M10 18h4"/>',
-  briefcase:'<rect width="20" height="14" x="2" y="7" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>'
 };
-const Icon = ({ n }) => <svg viewBox="0 0 24 24" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" stroke="currentColor" dangerouslySetInnerHTML={{ __html: PATHS[n] || PATHS.pin }} />;
+const Icon = ({ n }) => <svg viewBox="0 0 24 24" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" stroke="currentColor" dangerouslySetInnerHTML={{ __html: PATHS[n] }} />;
 
-/* Read Aloud Button Component */
+/* =====================================================================
+   Shared components
+   ===================================================================== */
 function ReadAloud({ text, lang = "hi-IN" }) {
-  return <button type="button" className="read-aloud-btn" onClick={() => speak(text, lang)} title="Listen to text">
-    <Icon n="volume" /> 🔊 Listen
+  return <button type="button" className="btn ghost sm" style={{ padding: "3px 8px", fontSize: ".8rem", display: "inline-flex", alignItems: "center", gap: "4px" }} onClick={() => speak(text, lang)}>
+    🔊 Listen
   </button>;
 }
-
-/* Modal Window Component */
 function Modal({ title, onClose, children }) {
   return <div className="overlay" onMouseDown={e => e.target === e.currentTarget && onClose()}>
     <div className="modal" role="dialog" aria-modal="true" aria-label={title}><h3>{title}</h3>{children}</div>
   </div>;
 }
 
-/* Leaflet Map Component */
-function MapView({ markers, lines = [], height = 340 }) {
+function MapView({ markers, lines = [], height = 380 }) {
   const el = useRef(); const map = useRef(); const layer = useRef();
   useEffect(() => {
     map.current = L.map(el.current, { scrollWheelZoom:false }).setView([22.5, 79], 4.6);
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom:18, attribution:"© OpenStreetMap" }).addTo(map.current);
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom:18, attribution:"© OpenStreetMap contributors" }).addTo(map.current);
     layer.current = L.layerGroup().addTo(map.current);
     setTimeout(() => map.current && map.current.invalidateSize(), 150);
-    return () => { if (map.current) { map.current.remove(); map.current = null; } };
+    return () => { map.current.remove(); map.current = null; };
   }, []);
   const sig = JSON.stringify([markers.map(m => [m.lat, m.lng, m.color, m.popup]), lines]);
   useEffect(() => {
     const g = layer.current; if (!g) return; g.clearLayers();
     lines.forEach(l => L.polyline(l.points, { color:l.color || "#0E2A5C", weight:3, dashArray:"6 8", opacity:.7 }).addTo(g));
     markers.forEach(m => L.circleMarker([m.lat, m.lng], { radius:m.r || 9, color:"#fff", weight:2, fillColor:m.color, fillOpacity:1 }).bindPopup(m.popup).addTo(g));
-    if (markers.length) map.current.fitBounds(L.latLngBounds(markers.map(m => [m.lat, m.lng])), { padding:[30, 30], maxZoom:9 });
+    if (markers.length) map.current.fitBounds(L.latLngBounds(markers.map(m => [m.lat, m.lng])), { padding:[40, 40], maxZoom:9 });
   }, [sig]);
-  return <div ref={el} style={{ height, borderRadius:'var(--r-md)', border:'1px solid var(--line)' }} />;
+  return <div ref={el} className="map" style={{ height }} />;
+}
+
+function PhotoField({ photo, setPhoto, label = "Add photo" }) {
+  const [cam, setCam] = useState(false);
+  const fileRef = useRef();
+  const fromFile = (e) => {
+    const f = e.target.files[0]; if (!f) return; const img = new Image();
+    img.onload = () => setPhoto(shrink(img, img.width, img.height)); img.src = URL.createObjectURL(f);
+  };
+  return <div className="photo-row">
+    {photo && <img className="thumb" src={photo} alt="Attached" />}
+    <button type="button" className="btn ghost sm" onClick={() => setCam(true)}><Icon n="camera" />{photo ? "Retake" : label}</button>
+    <button type="button" className="btn ghost sm" onClick={() => fileRef.current.click()}>Upload</button>
+    {photo && <button type="button" className="btn ghost sm" onClick={() => setPhoto(null)}>Remove</button>}
+    <input ref={fileRef} type="file" accept="image/*" hidden onChange={fromFile} />
+    {cam && <CameraModal onClose={() => setCam(false)} onCapture={setPhoto} />}
+  </div>;
+}
+function shrink(src, w0, h0) {
+  const w = 480, h = Math.round(w * (h0 || 3) / (w0 || 4));
+  const c = document.createElement("canvas"); c.width = w; c.height = h; c.getContext("2d").drawImage(src, 0, 0, w, h);
+  return c.toDataURL("image/jpeg", .7);
+}
+function CameraModal({ onCapture, onClose }) {
+  const v = useRef(); const stream = useRef(); const [err, setErr] = useState("");
+  useEffect(() => {
+    (async () => {
+      try {
+        if (!navigator.mediaDevices?.getUserMedia) throw new Error("not supported in this browser or context");
+        stream.current = await navigator.mediaDevices.getUserMedia({ video:{ facingMode:"environment" }, audio:false });
+        v.current.srcObject = stream.current; v.current.play();
+      } catch (e) { setErr("Camera unavailable: " + e.message + ". Use Upload instead."); }
+    })();
+    return () => stream.current && stream.current.getTracks().forEach(t => t.stop());
+  }, []);
+  const snap = () => { onCapture(shrink(v.current, v.current.videoWidth, v.current.videoHeight)); onClose(); };
+  return <Modal title="Take a photo" onClose={onClose}>
+    {err ? <p className="err">{err}</p> : <video ref={v} className="cam" playsInline muted />}
+    <div className="acts"><button className="btn ghost" onClick={onClose}>Cancel</button><button className="btn accent" disabled={!!err} onClick={snap}>Capture</button></div>
+  </Modal>;
+}
+
+function Bars({ items, green }) {
+  const max = Math.max(1, ...items.map(i => i[1]));
+  return <div className={"bars" + (green ? " g" : "")}>{items.map(([k, v]) =>
+    <div className="b" key={k}><span>{k}</span><div className="track"><div className="fill" style={{ width:(v / max * 100) + "%" }} /></div><b>{v}</b></div>)}
+    {!items.length && <p className="empty">No data yet.</p>}</div>;
 }
 
 /* =====================================================================
-   Navbar & Footer
+   Nav + Footer
    ===================================================================== */
 function Nav({ route }) {
-  const { user, online, logout } = useApp();
-  const L_ = [
-    ["home","Home"],
-    ["worker","My Mobility"],
-    ["schemes","Government Schemes"],
-    ["jobs","Jobs & Skills"],
-    ["help","Help Centre"]
-  ];
+  const { user, online, logout, openSettings } = useApp();
+  const L_ = [["home","Home"],["worker","Worker app"],["complaints","Complaint desk"],["admin","Admin"]];
   return <><div className="tri" /><nav className="nav"><div className="wrap">
     <a className="brand" href="#/home"><span className="mark"><Icon n="pin" /></span>Shram Sanchar</a>
-    <div className="nav-links">
-      {L_.map(([k, l]) => <a key={k} href={"#/" + k} className={route === k ? "on" : ""}>{l}</a>)}
-    </div>
+    <div className="nav-links">{L_.map(([k, l]) => <a key={k} href={"#/" + k} className={route === k ? "on" : ""}>{l}</a>)}</div>
     <div className="nav-right">
       <span className={"pill " + (online ? "on" : "off")}><Icon n={online ? "wifi" : "wifioff"} />{online ? "Online" : "Offline"}</span>
-      {user ? (
-        <><span className="small muted">{user.name}</span><button className="btn ghost sm" onClick={logout}>Log out</button></>
-      ) : (
-        <a className="btn primary sm" href="#/login">Log in</a>
-      )}
-    </div></div></nav>
-    
-    <div className="bottom-nav"><div className="wrap">
-      <a href="#/home" className={route === "home" ? "on" : ""}><Icon n="pin" />Home</a>
-      <a href="#/worker" className={route === "worker" ? "on" : ""}><Icon n="mic" />Mobility</a>
-      <a href="#/schemes" className={route === "schemes" ? "on" : ""}><Icon n="building" />Schemes</a>
-      <a href="#/help" className={route === "help" ? "on" : ""}><Icon n="help" />Help</a>
-    </div></div>
-  </>;
+      <button className="btn ghost sm" onClick={openSettings}>AI settings</button>
+      {user ? <><span className="small muted" style={{ maxWidth:110, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{user.name}</span><button className="btn ghost sm" onClick={logout}>Log out</button></>
+            : <a className="btn primary sm" href="#/login">Log in</a>}
+    </div></div></nav></>;
 }
 
+const HELPLINES = [
+  ["14434","e-Shram helpline","tel:14434"],["112","Emergency — police, fire, ambulance","tel:112"],["108","Ambulance","tel:108"],
+  ["181","Women helpline","tel:181"],["1098","Childline","tel:1098"],["1930","Cyber crime helpline","tel:1930"],
+  ["15100","NALSA free legal aid","tel:15100"],["14555","Ayushman Bharat (PM-JAY)","tel:14555"],["1947","UIDAI Aadhaar helpline","tel:1947"],
+];
+const GOVLINKS = [
+  ["e-Shram portal","eshram.gov.in","https://eshram.gov.in"],["Ministry of Labour & Employment","labour.gov.in","https://labour.gov.in"],
+  ["Shram Suvidha portal","shramsuvidha.gov.in","https://shramsuvidha.gov.in"],["BHASHINI (MeitY)","bhashini.gov.in","https://bhashini.gov.in"],
+  ["UIDAI — Aadhaar","uidai.gov.in","https://uidai.gov.in"],["Ayushman Bharat PM-JAY","pmjay.gov.in","https://pmjay.gov.in"],
+  ["EPFO","epfindia.gov.in","https://www.epfindia.gov.in"],["ESIC","esic.gov.in","https://www.esic.gov.in"],
+  ["CPGRAMS — public grievances","pgportal.gov.in","https://pgportal.gov.in"],["MyGov","mygov.in","https://www.mygov.in"],
+  ["NALSA — legal services","nalsa.gov.in","https://nalsa.gov.in"],["National Portal of India","india.gov.in","https://www.india.gov.in"],
+  ["UMANG app","umang.gov.in","https://web.umang.gov.in"],["MeitY — DPDP Act, 2023","meity.gov.in","https://www.meity.gov.in"],
+];
 function GovFooter() {
   return <footer className="gov"><div className="wrap">
-    <h3>Helplines — Free, Government-Run</h3>
-    <div className="helplines">
-      <div className="hl"><b><a href="tel:14434">14434</a></b><span>e-Shram Helpline</span></div>
-      <div className="hl"><b><a href="tel:112">112</a></b><span>Emergency (Police / Fire / Medical)</span></div>
-      <div className="hl"><b><a href="tel:181">181</a></b><span>Women Helpline</span></div>
-      <div className="hl"><b><a href="tel:1098">1098</a></b><span>Childline</span></div>
-    </div>
-    <h3>Official Portals</h3>
-    <div className="links">
-      <a href="https://eshram.gov.in" target="_blank" rel="noopener">e-Shram Portal <span>eshram.gov.in</span></a>
-      <a href="https://labour.gov.in" target="_blank" rel="noopener">Ministry of Labour <span>labour.gov.in</span></a>
-      <a href="https://pmjay.gov.in" target="_blank" rel="noopener">Ayushman Bharat <span>pmjay.gov.in</span></a>
-      <a href="https://nalsa.gov.in" target="_blank" rel="noopener">Legal Aid (NALSA) <span>nalsa.gov.in</span></a>
-    </div>
-    <p className="small muted" style={{ color: '#DCE5F5', opacity: 0.8 }}>
-      Shram Sanchar is a privacy-first integration layer for eShram. "We don't track workers. We help workers update their mobility."
-    </p>
+    <h3>Helplines — free, government-run</h3>
+    <div className="helplines">{HELPLINES.map(([n, l, h]) => <div className="hl" key={n}><b><a href={h}>{n}</a></b><span>{l}</span></div>)}</div>
+    <h3>Official government links</h3>
+    <div className="links">{GOVLINKS.map(([l, d, h]) => <a key={h} href={h} target="_blank" rel="noopener noreferrer">{l}<span>{d}</span></a>)}</div>
+    <p className="disclaimer">Shram Sanchar is a hackathon prototype built for Hack Devengers 2.0 and is not an official Government of India service. Helpline numbers and links are listed for convenience — please confirm them on the official portals before relying on them. Demo data on the admin page is fictional.</p>
   </div></footer>;
 }
 
 /* =====================================================================
-   Home Page
+   Home
    ===================================================================== */
+function HeroDemo() {
+  const line = "मैं सूरत जा रहा हूँ, निर्माण काम के लिए";
+  const reduce = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const [n, setN] = useState(reduce ? line.length : 0); const [ph, setPh] = useState(reduce ? 3 : 0);
+  useEffect(() => {
+    if (reduce) return; let t;
+    if (ph === 0) t = setTimeout(() => n < line.length ? setN(n + 1) : setPh(1), n === 0 ? 1000 : 55);
+    else if (ph === 1 || ph === 2) t = setTimeout(() => setPh(ph + 1), 750);
+    else t = setTimeout(() => { setN(0); setPh(0); }, 5000);
+    return () => clearTimeout(t);
+  }, [n, ph]);
+  const show = (k) => ({ opacity: ph >= k ? 1 : .18 });
+  return <div className="demo" aria-label="Animated example of a voice check-in">
+    <div className="bar"><span>eShram · Shram Sanchar</span><span>Offline — cached on device</span></div>
+    <div className="consent"><span><b>Location check-in: OFF</b><br />Turn on only for this trip?</span><span className="switch" /></div>
+    <div className={"mic" + (ph === 0 ? " live" : "")}><Icon n="mic" /></div>
+    <div className="said" lang="hi">“{line.slice(0, n)}”</div>
+    <div className="rec"><dl>
+      <dt>Destination</dt><dd style={show(1)}>Surat, GJ</dd>
+      <dt>Work type</dt><dd style={show(2)}>Construction</dd>
+      <dt>Intent</dt><dd style={show(2)}>Traveling</dd></dl>
+      <div className="st" style={show(3)}>Queued — will sync when a network appears</div></div>
+  </div>;
+}
 function Home() {
   const { user } = useApp();
   return <>
     <header className="hero"><div className="wrap">
       <div>
-        <div className="principle-banner">
-          🛡️ Core Principle: We don't track workers. We help workers update their mobility.
-        </div>
-        <h1>Updating worker mobility on eShram with consent & dignity.</h1>
-        <p className="lead">Voice-first, offline-capable, and completely voluntary. Workers update their current work location in their own language without continuous GPS tracking.</p>
+        <h1>Say where you’re going. Your eShram record keeps up.</h1>
+        <p className="lead">Shram Sanchar lets a migrant worker update their status by voice, in their own language, with no network needed — and reads location only when the worker switches it on for a trip.</p>
         <div className="cta">
-          <a className="btn accent lg" href={user ? "#/worker" : "#/login"}>
-            🎙️ {user ? "Update My Mobility" : "Log In & Update Mobility"}
-          </a>
-          <a className="btn ghost lg" href="#/schemes">🏛️ Government Schemes</a>
+          <a className="btn accent" href={user?.role === "citizen" ? "#/worker" : "#/login"}>{user?.role === "citizen" ? "Open worker app" : "Citizen login"}</a>
+          <a className="btn ghost" href="#/admin">See the admin view</a>
         </div>
+        <div className="facts">
+          <div><b>30+ crore</b><span>workers already on eShram</span></div>
+          <div><b>22</b><span>languages through Bhashini</span></div>
+          <div><b>0</b><span>continuous location trails</span></div>
+        </div>
+        <p className="track">Hack Devengers 2.0 · Track: Migrant Worker Tracking in eShram</p>
       </div>
-      <div className="panel" style={{ background: '#0E2A5C', color: '#fff' }}>
-        <h3 style={{ color: '#fff', marginBottom: 12 }}>Privacy-First Principles</h3>
-        <ul style={{ paddingLeft: 20, margin: 0, lineHeight: '1.8' }}>
-          <li><b>No Continuous Tracking:</b> Location is NEVER accessed in the background.</li>
-          <li><b>Consent-First:</b> Location read ONCE only when you permit.</li>
-          <li><b>Voice-Guided:</b> Speak in your native language (Hindi, English, etc.).</li>
-          <li><b>Offline Sync:</b> Works without network. Syncs automatically when online.</li>
-          <li><b>Worker Control:</b> AI extraction requires your explicit confirmation.</li>
+      <HeroDemo />
+    </div></header>
+
+    <section className="block" id="problem"><div className="wrap">
+      <div className="sec-head"><h2>A worker registry that goes stale the moment it’s filled</h2><p>eShram’s database is powerful, but migrant workers move faster than static forms can follow.</p></div>
+      <div className="grid4">
+        <div className="problem p1"><h3>Frequent mobility</h3><p>Workers change location and employer often, so registration data goes obsolete almost immediately.</p></div>
+        <div className="problem p2"><h3>Intermittent connectivity</h3><p>Job sites, transit routes and hometowns often have poor or no network coverage.</p></div>
+        <div className="problem p3"><h3>Digital literacy and language</h3><p>Text-heavy forms and dropdowns exclude workers unfamiliar with complex interfaces or non-native languages.</p></div>
+        <div className="problem p4"><h3>Fear of surveillance</h3><p>Continuous tracking feels invasive and deters adoption without clear, visible consent.</p></div>
+      </div>
+    </div></section>
+
+    <section className="block alt" id="how"><div className="wrap">
+      <div className="sec-head"><h2>Event-driven, not always-on</h2><p>Five steps from a spoken update to a live record, with no background tracking in between.</p></div>
+      <div className="steps">
+        <div className="step"><h4>Milestone trigger</h4><p>A large location shift or a manual check-in. Opt-in only.</p></div>
+        <div className="step"><h4>Voice check-in</h4><p>Speech becomes structured intent in the worker’s language.</p></div>
+        <div className="step"><h4>Offline cache</h4><p>The entry queues on the phone (IndexedDB) if there is no network.</p></div>
+        <div className="step"><h4>Sync engine</h4><p>The backend dedupes and syncs the queue on reconnect.</p></div>
+        <div className="step"><h4>eShram UAN update</h4><p>The status reaches the worker’s record through eShram’s data-sharing API.</p></div>
+      </div>
+    </div></section>
+
+    <section className="block"><div className="wrap privacy">
+      <div>
+        <h2>Consent you can see and switch off</h2>
+        <ul>
+          <li><b>Toggle first.</b> Location is never read until the worker turns it on for a trip.</li>
+          <li><b>Coarse by design.</b> Coordinates are rounded to about 1 km — enough for a milestone, not for following someone.</li>
+          <li><b>Delete anytime.</b> Workers can erase their check-ins from the app.</li>
+          <li><b>Plain language.</b> The notice is written for the worker, aligned with the DPDP Act, 2023.</li>
         </ul>
       </div>
-    </div></header>
+      <div className="callout">
+        <h3>Built on India’s public infrastructure</h3>
+        <p>UAN, eShram’s data-sharing API and Bhashini language services — an integration layer, not a parallel database. In this prototype, eShram is simulated by the browser’s local database and Bhashini by the browser’s speech recognition, so the flow can be tried end to end.</p>
+      </div>
+    </div></section>
+
+    <section className="block alt"><div className="wrap">
+      <div className="sec-head"><h2>Try the prototype</h2><p>Everything runs in your browser. Demo logins are on the login page.</p></div>
+      <div className="grid3">
+        <div className="panel"><h3>Worker app</h3><p className="muted small">Voice check-in, camera photo, offline queue and a map of your journey.</p><p style={{ marginTop:12 }}><a className="btn primary sm" href="#/worker">Open worker app</a></p></div>
+        <div className="panel"><h3>Complaint desk</h3><p className="muted small">File a grievance. Gemini checks how urgent it is and routes it.</p><p style={{ marginTop:12 }}><a className="btn primary sm" href="#/complaints">Open complaint desk</a></p></div>
+        <div className="panel"><h3>Admin dashboard</h3><p className="muted small">Officer view: worker map, destinations, and a complaint queue sorted by priority.</p><p style={{ marginTop:12 }}><a className="btn primary sm" href="#/admin">Open admin</a></p></div>
+      </div>
+    </div></section>
   </>;
 }
 
 /* =====================================================================
-   2. Login Page with Voice Assistant Integration
+   Login
    ===================================================================== */
-function Login({ next }) {
-  const { setUser, toast, openAssistant } = useApp();
-  const [step, setStep] = useState(1);
-  const [f, setF] = useState({ name:"", uan:"", mobile:"", otp:"" });
-  const [err, setErr] = useState("");
-
+function Login({ next, need }) {
+  const { setUser, toast } = useApp();
+  const [tab, setTab] = useState(need === "admin" ? "admin" : "citizen");
+  const [step, setStep] = useState(1); const [f, setF] = useState({ name:"", uan:"", mobile:"", otp:"", id:"", pw:"" }); const [err, setErr] = useState("");
   const set = (k) => (e) => setF({ ...f, [k]: e.target.value });
-
+  const done = (u, dest) => { localStorage.setItem("ss_user", JSON.stringify(u)); setUser(u); go(dest); };
   const sendOtp = (e) => {
     e.preventDefault(); setErr("");
     if (f.name.trim().length < 2) return setErr("Enter your full name.");
     if (!/^\d{12}$/.test(f.uan)) return setErr("UAN must be exactly 12 digits.");
     if (!/^[6-9]\d{9}$/.test(f.mobile)) return setErr("Enter a valid 10-digit mobile number.");
-    setStep(2);
-    toast("Demo OTP: 123456");
+    setStep(2); toast("Demo OTP: 123456");
   };
-
   const verify = (e) => {
     e.preventDefault();
-    if (f.otp !== "123456") return setErr("Wrong OTP. For demo use 123456.");
-    const u = { role:"citizen", name:f.name.trim(), uan:f.uan, mobile:f.mobile };
-    localStorage.setItem("ss_user", JSON.stringify(u));
-    setUser(u);
-    go(next || "worker");
+    if (f.otp !== "123456") return setErr("Wrong OTP. In this demo it is 123456.");
+    done({ role:"citizen", name:f.name.trim(), uan:f.uan, mobile:f.mobile }, next || "worker");
   };
-
-  return <div className="page"><div className="wrap"><div className="cols even" style={{ maxWidth: 880, margin: '0 auto' }}>
-    <div className="panel">
-      <h2 style={{ marginBottom: 14 }}>Worker Login</h2>
-      <p className="muted small" style={{ marginBottom: 16 }}>Log in using your 12-digit eShram UAN number.</p>
-
-      {step === 1 && <form onSubmit={sendOtp}>
-        <div className="field"><label>Full Name</label><input value={f.name} onChange={set("name")} placeholder="e.g. Ramesh Kumar" /></div>
-        <div className="field"><label>UAN Number (12 digits)</label><input inputMode="numeric" maxLength={12} value={f.uan} onChange={set("uan")} placeholder="1234 5678 9012" /></div>
-        <div className="field"><label>Mobile Number</label><input inputMode="numeric" maxLength={10} value={f.mobile} onChange={set("mobile")} placeholder="9876543210" /></div>
-        {err && <p className="err" style={{ color: 'var(--red)', fontSize: '.85rem' }}>{err}</p>}
-        <button className="btn primary" style={{ width: "100%", marginTop: 8 }}>Send OTP</button>
-      </form>}
-
-      {step === 2 && <form onSubmit={verify}>
-        <p className="muted small">Enter 6-digit OTP sent to {f.mobile} (Demo: <b>123456</b>)</p>
-        <div className="field" style={{ marginTop: 10 }}><label>OTP Code</label><input inputMode="numeric" maxLength={6} value={f.otp} onChange={set("otp")} autoFocus /></div>
-        {err && <p className="err" style={{ color: 'var(--red)', fontSize: '.85rem' }}>{err}</p>}
-        <div className="row" style={{ marginTop: 12 }}>
-          <button type="button" className="btn ghost" onClick={() => setStep(1)}>Back</button>
-          <button className="btn primary">Verify & Log In</button>
-        </div>
-      </form>}
-
-      <div style={{ marginTop: 24, paddingTop: 16, borderTop: '1px solid var(--line)', textAlign: 'center' }}>
-        <button type="button" className="btn accent" style={{ width: '100%' }} onClick={() => openAssistant("How do I login?")}>
-          🎙️ "Need Help?" — Speak with AI Assistant
-        </button>
-        <p className="muted small" style={{ marginTop: 8 }}>
-          Note: Voice assistant guides and explains. Login requires UAN + OTP verification.
-        </p>
-      </div>
-    </div>
-
-    <div className="panel" style={{ background: 'var(--bg)' }}>
-      <h3>Accessibility & Voice Support</h3>
-      <p className="muted small" style={{ marginTop: 8 }}>Need help logging in? Our AI Voice Assistant can read instructions and answer questions in Hindi and English.</p>
-      
-      <div style={{ marginTop: 16, display: 'flex', flexDirection: 'column', gap: 8 }}>
-        <button className="btn ghost sm" style={{ textStyle: 'left', justifyContent: 'flex-start' }} onClick={() => openAssistant("What is UAN?")}>
-          ❓ "What is UAN?"
-        </button>
-        <button className="btn ghost sm" style={{ textStyle: 'left', justifyContent: 'flex-start' }} onClick={() => openAssistant("How do I update my location?")}>
-          📍 "How do I update my location?"
-        </button>
-        <button className="btn ghost sm" style={{ textStyle: 'left', justifyContent: 'flex-start' }} onClick={() => openAssistant("What is eShram?")}>
-          🏛️ "What is eShram?"
+  const adminLogin = (e) => {
+    e.preventDefault();
+    if (f.id === "admin" && f.pw === "admin123") done({ role:"admin", name:"Labour Officer" }, next || "admin");
+    else setErr("Wrong ID or password. Demo: admin / admin123");
+  };
+  return <div className="page"><div className="wrap"><div className="login panel">
+    <h2 style={{ marginBottom:14 }}>Log in</h2>
+    <div className="tabs">{[["citizen","Citizen"],["admin","Officer"]].map(([k, l]) => <button key={k} className={tab === k ? "on" : ""} onClick={() => { setTab(k); setErr(""); setStep(1); }}>{l}</button>)}</div>
+    {tab === "citizen" && step === 1 && <form onSubmit={sendOtp}>
+      <div className="hint">Demo: use any name, any 12-digit number as UAN, and any mobile starting with 6–9. The OTP is 123456. Aadhaar eKYC would replace this step in production.</div>
+      <div className="field"><label htmlFor="n">Full name</label><input id="n" value={f.name} onChange={set("name")} autoComplete="name" /></div>
+      <div className="field"><label htmlFor="u">UAN (12 digits)</label><input id="u" inputMode="numeric" maxLength={12} value={f.uan} onChange={set("uan")} /></div>
+      <div className="field"><label htmlFor="m">Mobile number</label><input id="m" inputMode="numeric" maxLength={10} value={f.mobile} onChange={set("mobile")} autoComplete="tel" /></div>
+      {err && <p className="err">{err}</p>}<button className="btn primary" style={{ width:"100%" }}>Send OTP</button>
+      <div style={{ marginTop: "14px", textAlign: "center" }}>
+        <button type="button" className="btn accent sm" style={{ width: "100%" }} onClick={() => speak("To log in, enter your full name, 12 digit U A N number, and mobile number. Then click Send O T P.", "en-IN")}>
+          🎙️ "Need Help?" (Listen Login Instructions)
         </button>
       </div>
-      
-      <ReadAloud text="Namaste. To log in, enter your full name, 12-digit UAN number, and mobile number. You will receive an OTP code to log in safely." />
-    </div>
+    </form>}
+    {tab === "citizen" && step === 2 && <form onSubmit={verify}>
+      <p className="muted small" style={{ marginBottom:12 }}>Enter the 6-digit OTP sent to {f.mobile}.</p>
+      <div className="field"><label htmlFor="o">OTP</label><input id="o" inputMode="numeric" maxLength={6} value={f.otp} onChange={set("otp")} autoFocus /></div>
+      {err && <p className="err">{err}</p>}
+      <div className="row"><button type="button" className="btn ghost" onClick={() => { setStep(1); setErr(""); }}>Back</button><button className="btn primary">Verify and log in</button></div>
+    </form>}
+    {tab === "admin" && <form onSubmit={adminLogin}>
+      <div className="hint">Admin access: Log in with credentials or click Quick Demo Access.</div>
+      <div className="field"><label htmlFor="a">Officer ID</label><input id="a" value={f.id} onChange={set("id")} autoComplete="username" /></div>
+      <div className="field"><label htmlFor="p">Password</label><input id="p" type="password" value={f.pw} onChange={set("pw")} autoComplete="current-password" /></div>
+      {err && <p className="err">{err}</p>}
+      <div className="row">
+        <button className="btn primary">Log in</button>
+        <button type="button" className="btn accent" onClick={() => done({ role:"admin", name:"Labour Officer" }, next || "admin")}>Quick Demo Access</button>
+      </div>
+    </form>}
   </div></div></div>;
 }
 
 /* =====================================================================
-   4. Mobility Update Flow & Confidence Score
+   Worker app
    ===================================================================== */
-function WorkerDashboard() {
+const LANGS = [["en-IN","English"],["hi-IN","हिन्दी"],["mr-IN","मराठी"],["gu-IN","ગુજરાતી"],["bn-IN","বাংলা"],["ta-IN","தமிழ்"],["te-IN","తెలుగు"],["kn-IN","ಕನ್ನಡ"],["ml-IN","മലയാളം"],["pa-IN","ਪੰਜਾਬੀ"]];
+function Worker() {
   const { user, data, reload, online, sim, setSim, toast } = useApp();
-  const [step, setStep] = useState("INIT"); // INIT -> CONSENT -> INPUT -> CONFIRM -> SAVED
-  const [consentGranted, setConsentGranted] = useState(false);
-  const [speechText, setSpeechText] = useState("");
-  const [listening, setListening] = useState(false);
-  const [busy, setBusy] = useState(false);
-  const [aiExtraction, setAiExtraction] = useState(null);
-  const [userEdited, setUserEdited] = useState(false);
-  const [locationData, setLocationData] = useState(null);
+  const [lang, setLang] = useState(() => localStorage.getItem("ss_lang") || "hi-IN");
+  const [consent, setConsent] = useState(() => JSON.parse(localStorage.getItem("ss_consent") || '{"on":false}'));
+  const [text, setText] = useState(""); const [listening, setListening] = useState(false); const [busy, setBusy] = useState(false);
+  const [parsed, setParsed] = useState(null); const [photo, setPhoto] = useState(null); const [confirmDel, setConfirmDel] = useState(false);
+  const rec = useRef();
 
-  const mine = data.checkins.concat(data.queue).filter(x => x.uan === user.uan).sort((a,b) => b.createdAt - a.createdAt);
-  const lastUpdate = mine[0];
+  const toggleConsent = () => { const c = { on: !consent.on, at: Date.now() }; setConsent(c); localStorage.setItem("ss_consent", JSON.stringify(c)); toast(c.on ? "Location check-in is ON for this trip." : "Location check-in is OFF."); };
+  const changeLang = (v) => { setLang(v); localStorage.setItem("ss_lang", v); };
 
-  const startVoiceInput = () => {
+  const analyze = async (t) => {
+    if (!t.trim()) return toast("Speak or type your update first."); setBusy(true);
+    let out;
+    try { out = parseJSON(await gemini({ system: EXTRACT_SYS, json:true, contents:[{ role:"user", parts:[{ text:t }] }] })); out.source = "Gemini"; }
+    catch { out = localExtract(t); out.source = "On-device parser"; }
+    const geo = await resolveDestination(out.destination) || findCity(t);
+    setParsed({ destination: geo?.name || out.destination || "", state: geo?.state || out.state || "", lat: geo?.lat, lng: geo?.lng,
+      jobType: out.job_type || "", intent: INTENT[out.intent] ? out.intent : "traveling", summary: out.summary || "", source: out.source });
+    setBusy(false);
+  };
+  const startListen = () => {
     const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SR) return toast("Speech input requires Chrome or Edge. Please type your update.");
-    if (listening) return;
-    
-    const r = new SR(); r.lang = "hi-IN"; r.interimResults = true;
-    r.onresult = (e) => {
-      let t = ""; for (let i = 0; i < e.results.length; i++) t += e.results[i][0].transcript;
-      setSpeechText(t);
-    };
-    r.onerror = (e) => { setListening(false); toast("Voice input error: " + e.error); };
-    r.onend = () => { setListening(false); };
-    r.start(); setListening(true);
+    if (!SR) return toast("Voice input needs Chrome or Edge. Type your update instead.");
+    if (listening) { rec.current && rec.current.stop(); return; }
+    const r = new SR(); r.lang = lang; r.interimResults = true; r.continuous = false; let last = "";
+    r.onresult = (e) => { let t = ""; for (let i = 0; i < e.results.length; i++) t += e.results[i][0].transcript; last = t; setText(t); };
+    r.onerror = (e) => { setListening(false); toast(e.error === "not-allowed" ? "Microphone blocked. Allow it in the browser address bar." : "Voice error: " + e.error); };
+    r.onend = () => { setListening(false); if (last.trim()) analyze(last); };
+    rec.current = r; setText(""); setParsed(null); r.start(); setListening(true);
+  };
+  const confirm = async () => {
+    if (!parsed) return; setBusy(true);
+    let gps = null;
+    if (consent.on && navigator.geolocation) gps = await new Promise(res => navigator.geolocation.getCurrentPosition(
+      p => res({ lat:+p.coords.latitude.toFixed(2), lng:+p.coords.longitude.toFixed(2) }), () => { toast("Could not read location — saved without it."); res(null); }, { timeout:8000, maximumAge:60000 }));
+    const r = { id:uid(), uan:user.uan, name:user.name, destination:parsed.destination, state:parsed.state,
+      lat: parsed.lat != null ? +parsed.lat.toFixed(2) : gps?.lat, lng: parsed.lng != null ? +parsed.lng.toFixed(2) : gps?.lng, gps,
+      jobType:parsed.jobType, intent:parsed.intent, transcript:text, lang, photo, consent:consent.on, createdAt:Date.now(), status:"queued" };
+    await DB.put("queue", r);
+    if (isOnline()) { await syncQueue(); toast("Check-in synced to eShram (mock API)."); } else toast("Saved on this phone. It will sync when the network returns.");
+    await reload(); speak(lang === "hi-IN" ? "चेक-इन सेव हो गया" : "Check-in saved", lang);
+    setParsed(null); setText(""); setPhoto(null); setBusy(false);
+  };
+  const eraseMine = async () => {
+    for (const r of [...data.queue, ...data.checkins].filter(x => x.uan === user.uan)) { await DB.del("queue", r.id); await DB.del("checkins", r.id); }
+    await reload(); setConfirmDel(false); toast("Your check-ins were deleted.");
   };
 
-  const handleProcessMobility = async () => {
-    if (!speechText.trim()) return toast("Please speak or type your update first.");
-    setBusy(true);
-    const extracted = await callExtractIntent(speechText);
-    setAiExtraction(extracted);
-    setBusy(false);
-    setStep("CONFIRM");
-  };
-
-  const handleRequestConsentAndLocation = () => {
-    if (navigator.geolocation) {
-      toast("Requesting location once...");
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          setLocationData({ lat: +pos.coords.latitude.toFixed(2), lng: +pos.coords.longitude.toFixed(2) });
-          setConsentGranted(true);
-          toast("Location access granted for this update.");
-          setStep("INPUT");
-        },
-        () => {
-          setConsentGranted(false);
-          toast("Location permission denied. Continuing without GPS.");
-          setStep("INPUT");
-        },
-        { timeout: 8000 }
-      );
-    } else {
-      setConsentGranted(false);
-      setStep("INPUT");
-    }
-  };
-
-  const handleFinalConfirm = async () => {
-    setBusy(true);
-    const confidenceCalc = calculateDataConfidence({
-      workerConfirmed: true,
-      locationAvailable: !!locationData,
-      aiExtracted: !!aiExtraction,
-      userModified: userEdited,
-      validTimestamp: true
-    });
-
-    const record = {
-      id: uid(),
-      uan: user.uan,
-      name: user.name,
-      destination: aiExtraction.destination || "Surat, Gujarat",
-      occupation: aiExtraction.occupation || "Construction Worker",
-      status: aiExtraction.status || "Traveling",
-      transcript: speechText,
-      lat: locationData?.lat || 21.17,
-      lng: locationData?.lng || 72.83,
-      gpsConsent: consentGranted,
-      confidenceScore: confidenceCalc.score,
-      confidenceBreakdown: confidenceCalc.breakdown,
-      createdAt: Date.now(),
-      syncStatus: isOnline() ? "synced" : "queued"
-    };
-
-    if (isOnline()) {
-      await DB.put("checkins", { ...record, status: "synced" });
-      toast("🟢 Online: Mobility update synchronized successfully!");
-    } else {
-      await DB.put("queue", { ...record, status: "queued" });
-      toast("🔴 Offline Mode: Saved locally on device — Queued for Sync.");
-    }
-
-    await reload();
-    setBusy(false);
-    setStep("INIT");
-    setSpeechText("");
-    setAiExtraction(null);
-    setLocationData(null);
-  };
+  const mine = [...data.queue, ...data.checkins].filter(x => x.uan === user.uan).sort((a, b) => b.createdAt - a.createdAt);
+  const markers = mine.filter(m => m.lat != null).map(m => ({ lat:m.lat, lng:m.lng, color: m.status === "queued" ? "#F07D1A" : "#1F8A4C",
+    popup:`<b>${esc(m.destination || "Check-in")}</b><br>${esc(m.jobType)} · ${esc(INTENT[m.intent])}<br>${fmtTime(m.createdAt)}` }));
+  const lines = useMemo(() => [{ points: [...mine].reverse().filter(m => m.lat != null).map(m => [m.lat, m.lng]) }], [mine.length]);
 
   return <div className="page"><div className="wrap">
-    {/* Header & Dashboard Summary */}
-    <div className="page-head">
-      <div>
-        <h2>Welcome, {user.name}</h2>
-        <p className="muted">UAN: {user.uan} · eShram Mobility Portal</p>
-      </div>
-      <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-        <span className={"pill " + (isOnline() ? "on" : "off")}>
-          {isOnline() ? "🟢 Online" : "🔴 Offline Mode"}
-        </span>
-        <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '.85rem' }}>
-          Simulate Offline:
-          <input type="checkbox" checked={sim} onChange={(e) => setSim(e.target.checked)} />
-        </label>
-      </div>
-    </div>
-
-    {/* Privacy Protection Card */}
-    <div className="privacy-card">
-      <h4><Icon n="shield" /> Privacy Protection Active</h4>
-      <div className="privacy-grid">
-        <div className="privacy-item"><span>Continuous Tracking:</span> <b>OFF</b></div>
-        <div className="privacy-item"><span>Background GPS:</span> <b>OFF</b></div>
-        <div className="privacy-item"><span>Worker Confirmed Updates:</span> <b>{mine.length}</b></div>
-        <div className="privacy-item"><span>Location Read:</span> <b>Only when permitted</b></div>
-      </div>
-    </div>
-
+    <div className="page-head"><div><h2>Namaste, {user.name.split(" ")[0]}</h2><p>UAN {user.uan.slice(0, 4)}••••{user.uan.slice(-4)} · Check in only when you move.</p></div>
+      <label className="row" style={{ alignItems:"center", flex:"none", gap:8 }}><span className="small muted">Simulate no network</span>
+        <button className={"toggle" + (sim ? " on" : "")} onClick={() => setSim(!sim)} aria-pressed={sim} aria-label="Simulate no network" /></label></div>
     <div className="cols">
       <div className="stack">
-        {/* Step 1: Init Button */}
-        {step === "INIT" && <div className="panel" style={{ textAlign: 'center', padding: 32 }}>
-          <h3>🎙️ Update My Mobility</h3>
-          <p className="muted" style={{ margin: '12px 0 20px' }}>
-            Report where you are moving for work. Simple, voluntary, and voice-enabled.
-          </p>
-          <button className="btn accent lg" onClick={() => setStep("CONSENT")}>
-            Start Mobility Update
-          </button>
-        </div>}
+        <div className={"consent-box" + (consent.on ? " on" : "")}>
+          <div className="txt"><b>Location check-in: {consent.on ? "ON for this trip" : "OFF"}</b>
+            {consent.on ? "Your phone location is read once, roughly (about 1 km), each time you confirm a check-in."
+                        : "When OFF, we never read your location. You can still check in by telling us where you are going."}
+            <div lang="hi" className="muted" style={{ marginTop:4 }}>आपकी लोकेशन सिर्फ़ तब पढ़ी जाएगी जब आप चेक-इन पक्का करेंगे।</div></div>
+          <button className={"toggle" + (consent.on ? " on" : "")} onClick={toggleConsent} aria-pressed={consent.on} aria-label="Location check-in" />
+        </div>
 
-        {/* Step 2: Clear Consent Notice */}
-        {step === "CONSENT" && <div className="panel">
-          <h3>Location Consent Notice</h3>
-          <p style={{ margin: '12px 0', fontSize: '.95rem' }}>
-            "Your location will be used only for this mobility update. We do not continuously track your location."
-          </p>
-          <div className="row" style={{ marginTop: 20 }}>
-            <button className="btn primary" onClick={handleRequestConsentAndLocation}>
-              Allow for this update
-            </button>
-            <button className="btn ghost" onClick={() => setStep("INPUT")}>
-              Continue without location
-            </button>
-            <button className="btn danger" onClick={() => setStep("INIT")}>Cancel</button>
+        <div className="panel">
+          <h3>Voice check-in</h3>
+          <div className="field" style={{ marginTop:10 }}><label htmlFor="lg">Language</label><select id="lg" value={lang} onChange={e => changeLang(e.target.value)}>{LANGS.map(([c, n]) => <option key={c} value={c}>{n}</option>)}</select></div>
+          <div className="voice">
+            <button className={"micbtn" + (listening ? " live" : "")} onClick={startListen} aria-label={listening ? "Stop listening" : "Start speaking"}><Icon n="mic" /></button>
+            <p className="small muted" style={{ marginBottom:10 }}>{listening ? "Listening… tap to stop" : "Tap and say, for example: “I am traveling to Surat for construction work”"}</p>
           </div>
-        </div>}
+          <div className="field"><label htmlFor="tx">What you said (you can also type)</label>
+            <textarea id="tx" lang={lang.slice(0, 2)} value={text} onChange={e => setText(e.target.value)} placeholder="मैं सूरत जा रहा हूँ, निर्माण काम के लिए" /></div>
+          <button className="btn primary" disabled={busy || !text.trim()} onClick={() => analyze(text)}>{busy && !parsed ? "Understanding…" : "Understand my update"}</button>
+        </div>
 
-        {/* Step 3 & 4: Voice / Text Input */}
-        {step === "INPUT" && <div className="panel">
-          <h3>Step 2: Speak or Type Your Update</h3>
-          <p className="muted small" style={{ marginBottom: 12 }}>
-            Example: "I am going to Surat for construction work." / "मैं सूरत जा रहा हूँ, निर्माण काम के लिए"
-          </p>
+        {parsed && <div className="panel parsed">
+          <h3>Check this before you confirm</h3><p className="src">Read by: {parsed.source}. Fix anything that is wrong.</p>
+          <div className="row"><div className="field"><label htmlFor="d">Destination</label><input id="d" value={parsed.destination} onChange={e => setParsed({ ...parsed, destination:e.target.value, lat:undefined, lng:undefined })} onBlur={async e => { const g = await resolveDestination(e.target.value); if (g) setParsed(p => ({ ...p, destination:g.name, state:g.state, lat:g.lat, lng:g.lng })); }} /></div>
+            <div className="field"><label htmlFor="j">Work type</label><input id="j" value={parsed.jobType} onChange={e => setParsed({ ...parsed, jobType:e.target.value })} /></div></div>
+          <div className="field"><label htmlFor="i">Status</label><select id="i" value={parsed.intent} onChange={e => setParsed({ ...parsed, intent:e.target.value })}>{Object.entries(INTENT).map(([k, v]) => <option key={k} value={k}>{v}</option>)}</select></div>
+          <div className="field"><label>Site photo (optional)</label><PhotoField photo={photo} setPhoto={setPhoto} label="Take photo" /></div>
           
-          <div className="voice-box">
-            <button className={"micbtn " + (listening ? "live" : "")} onClick={startVoiceInput}>
-              <Icon n="mic" />
-            </button>
-            <p className="small muted">{listening ? "Listening... speak now" : "Tap to speak"}</p>
+          <div style={{ background: "var(--bg)", padding: "10px 12px", borderRadius: "var(--r-sm)", margin: "10px 0", fontSize: ".85rem", border: "1px solid var(--line)" }}>
+            <b>Data Confidence Breakdown:</b>
+            <div style={{ display: "flex", gap: "10px", marginTop: "4px", flexWrap: "wrap" }}>
+              <span>✓ Worker Confirmed (+30)</span>
+              <span>{consent.on ? "✓ Location Shared (+25)" : "○ No Location (+0)"}</span>
+              <span>✓ AI Extracted (+20)</span>
+              <span>✓ Valid Time (+10)</span>
+            </div>
+            <div style={{ marginTop: "4px", fontWeight: "700", color: "var(--navy)" }}>
+              Data Confidence Score: {consent.on ? "85%" : "60%"}
+            </div>
           </div>
 
-          <div className="field">
-            <textarea value={speechText} onChange={(e) => setSpeechText(e.target.value)} placeholder="Type or speak here..." />
-          </div>
-
-          <div className="row">
-            <button className="btn ghost" onClick={() => setStep("INIT")}>Cancel</button>
-            <button className="btn primary" disabled={busy || !speechText.trim()} onClick={handleProcessMobility}>
-              {busy ? "Understanding..." : "Extract Intent & Review"}
-            </button>
-          </div>
+          <div className="row"><button className="btn ghost" onClick={() => setParsed(null)}>Discard</button><button className="btn accent" disabled={busy} onClick={confirm}>{busy ? "Saving…" : "Confirm check-in"}</button></div>
+          <p className="small muted" style={{ marginTop:10 }}>{online ? "You are online: this will sync right away." : "You are offline: this will be saved on your phone and synced later."}</p>
         </div>}
+      </div>
 
-        {/* Step 5 & 6: AI Intent Confirmation */}
-        {step === "CONFIRM" && aiExtraction && <div className="panel">
-          <h3>"Did we understand you correctly?"</h3>
-          <p className="muted small" style={{ marginBottom: 14 }}>
-            AI extracted structured intent from your statement. Please review before saving.
-          </p>
+      <div className="stack">
+        <div className="panel"><h3>Your journey</h3><p className="small muted" style={{ marginBottom:12 }}>Only check-ins you confirmed appear here. There is no background trail.</p>
+          <MapView markers={markers} lines={lines} />
+          <div className="legend"><span><i style={{ background:"#1F8A4C" }} />Synced to eShram</span><span><i style={{ background:"#F07D1A" }} />Waiting on this phone</span></div></div>
+        <div className="panel"><div className="page-head" style={{ marginBottom:0 }}><h3>Check-in history</h3>
+          {mine.length > 0 && <button className="btn danger sm" onClick={() => setConfirmDel(true)}>Delete my check-ins</button>}</div>
+          {mine.length === 0 ? <p className="empty">No check-ins yet. Tap the microphone to make your first one.</p> :
+            <ul className="timeline">{mine.map(m => <li key={m.id}><div className="when">{fmtTime(m.createdAt)}</div>
+              <div className="what"><b>{m.destination || "Unknown place"}{m.state ? ", " + m.state : ""}</b><span className="small muted">{m.jobType || "—"} · {INTENT[m.intent]}{m.gps ? " · location shared" : ""}</span>
+                {m.transcript && <div className="small muted" lang={m.lang.slice(0, 2)}>“{m.transcript}”</div>}</div>
+              {m.photo && <img className="thumb" style={{ width:48, height:48 }} src={m.photo} alt="Site" />}
+              <span className={"badge b-" + m.status} style={{ alignSelf:"flex-start" }}>{m.status === "queued" ? "Queued" : "Synced"}</span></li>)}</ul>}
+        </div>
+      </div>
+    </div>
+    {confirmDel && <Modal title="Delete all your check-ins?" onClose={() => setConfirmDel(false)}>
+      <p className="muted">This removes every check-in of yours from this prototype’s database. It cannot be undone.</p>
+      <div className="acts"><button className="btn ghost" onClick={() => setConfirmDel(false)}>Keep them</button><button className="btn danger" onClick={eraseMine}>Delete</button></div></Modal>}
+  </div></div>;
+}
 
-          <div className="field">
-            <label>Destination City & State</label>
-            <input value={aiExtraction.destination} onChange={(e) => { setAiExtraction({...aiExtraction, destination: e.target.value}); setUserEdited(true); }} />
-          </div>
-
-          <div className="field">
-            <label>Work / Occupation</label>
-            <input value={aiExtraction.occupation} onChange={(e) => { setAiExtraction({...aiExtraction, occupation: e.target.value}); setUserEdited(true); }} />
-          </div>
-
-          <div className="field">
-            <label>Status</label>
-            <select value={aiExtraction.status} onChange={(e) => { setAiExtraction({...aiExtraction, status: e.target.value}); setUserEdited(true); }}>
-              <option value="Traveling">Traveling for work</option>
-              <option value="Arrived">Arrived at site</option>
-              <option value="Returning home">Returning home</option>
-              <option value="Seeking work">Seeking work</option>
+/* =====================================================================
+   Complaint desk
+   ===================================================================== */
+const CATS = ["Wages unpaid","Unsafe working conditions","Harassment","Accommodation or food","eShram card / UAN issue","Other"];
+function Complaints() {
+  const { user, data, reload, toast } = useApp();
+  const [f, setF] = useState({ category:CATS[0], description:"", location:"" }); const [photo, setPhoto] = useState(null); const [busy, setBusy] = useState(false); const [last, setLast] = useState(null); const [err, setErr] = useState("");
+  const submit = async (e) => {
+    e.preventDefault(); setErr("");
+    if (f.description.trim().length < 15) return setErr("Please describe the problem in at least a sentence or two.");
+    setBusy(true);
+    const p = await checkPriority(f.description, f.category);
+    if (f.userPriority && f.userPriority !== "Auto") {
+      p.priority = f.userPriority;
+      p.reason = "Priority selected by worker: " + f.userPriority + " (" + p.reason + ")";
+    }
+    const c = { id:"SS-" + new Date().getFullYear() + "-" + Math.floor(1000 + Math.random() * 9000), uan:user.uan, name:user.name, ...f, photo, createdAt:Date.now(), status:"Open", ...p };
+    await DB.put("complaints", c); await reload(); setLast(c); setF({ category:CATS[0], description:"", location:"" }); setPhoto(null); setBusy(false);
+  };
+  const mine = data.complaints.filter(c => c.uan === user.uan).sort((a, b) => b.createdAt - a.createdAt);
+  return <div className="page"><div className="wrap">
+    <div className="page-head"><div><h2>Complaint desk</h2><p>Tell us what went wrong. Urgent cases are flagged for an officer straight away.</p></div></div>
+    <div className="cols even">
+      <div className="panel"><h3>New complaint</h3>
+        <form onSubmit={submit} style={{ marginTop:12 }}>
+          <div className="field"><label htmlFor="c">What is the problem about?</label><select id="c" value={f.category} onChange={e => setF({ ...f, category:e.target.value })}>{CATS.map(c => <option key={c}>{c}</option>)}</select></div>
+          <div className="field"><label htmlFor="pr">Urgency Level (Self-Assessed)</label>
+            <select id="pr" value={f.userPriority || "Auto"} onChange={e => setF({ ...f, userPriority:e.target.value })}>
+              <option value="Auto">Auto-detect via AI / Rules</option>
+              <option value="Critical">Critical (Immediate Danger / Safety / Confinement)</option>
+              <option value="High">High (Unpaid Wages / Harassment / Shelter)</option>
+              <option value="Medium">Medium (eShram / UAN Card / Benefit issue)</option>
+              <option value="Low">Low (General Query / Feedback)</option>
             </select>
           </div>
-
-          {/* Data Confidence Calculation */}
-          {(() => {
-            const conf = calculateDataConfidence({
-              workerConfirmed: true,
-              locationAvailable: !!locationData,
-              aiExtracted: !!aiExtraction,
-              userModified: userEdited,
-              validTimestamp: true
-            });
-            return <div className="confidence-box">
-              <div className="confidence-header">
-                <span>Data Confidence Score:</span>
-                <span className="confidence-score">📊 {conf.score}%</span>
-              </div>
-              <ul className="confidence-list">
-                {conf.breakdown.map((b, i) => <li key={i} className={b.pass ? "check" : "uncheck"}>
-                  {b.pass ? "✓" : "○"} {b.text} ({b.val})
-                </li>)}
-              </ul>
-            </div>;
-          })()}
-
-          <div className="row" style={{ marginTop: 16 }}>
-            <button className="btn ghost" onClick={() => setStep("INPUT")}>✎ EDIT STATEMENT</button>
-            <button className="btn accent lg" disabled={busy} onClick={handleFinalConfirm}>
-              {busy ? "Saving..." : "✓ YES, CONFIRM UPDATE"}
-            </button>
-          </div>
-        </div>}
+          <div className="field"><label htmlFor="ds">What happened?</label><textarea id="ds" value={f.description} onChange={e => setF({ ...f, description:e.target.value })} placeholder="Say when, where and who was involved. You can write in any language." /></div>
+          <div className="field"><label htmlFor="lc">Where (city / site)</label><input id="lc" value={f.location} onChange={e => setF({ ...f, location:e.target.value })} placeholder="Surat, GJ — Vesu construction site" /></div>
+          <div className="field"><label>Photo or evidence (optional)</label><PhotoField photo={photo} setPhoto={setPhoto} /></div>
+          {err && <p className="err">{err}</p>}
+          <button className="btn accent" disabled={busy}>{busy ? "Checking urgency…" : "Submit complaint"}</button>
+        </form>
+        {last && <div className="hint" style={{ marginTop:16, marginBottom:0, background:"var(--green-2)", color:"#12572F" }}>
+          <b>Complaint {last.id} received.</b> Priority: <span className={"badge b-" + last.priority}>{last.priority}</span>
+          <div style={{ marginTop:6 }}>{last.reason} Sent to: {last.department}.</div>
+          {last.priority === "Critical" && <div style={{ marginTop:6 }}><b>If you are in danger now, call <a href="tel:112">112</a>.</b></div>}</div>}
       </div>
-
-      {/* History & Status Column */}
-      <div className="stack">
-        <div className="panel">
-          <h3>Last Worker-Confirmed Update</h3>
-          {lastUpdate ? (
-            <div style={{ marginTop: 10 }}>
-              <p><b>Destination:</b> {lastUpdate.destination}</p>
-              <p><b>Work:</b> {lastUpdate.occupation}</p>
-              <p><b>Status:</b> {lastUpdate.status}</p>
-              <p><b>Data Confidence:</b> {lastUpdate.confidenceScore || 85}%</p>
-              <p><b>Sync Status:</b> <span className={"badge b-" + (lastUpdate.status === "synced" || lastUpdate.syncStatus === "synced" ? "synced" : "queued")}>
-                {lastUpdate.status === "synced" || lastUpdate.syncStatus === "synced" ? "Synced to eShram" : "Queued on Device"}
-              </span></p>
-              <p className="small muted" style={{ marginTop: 6 }}>Updated: {fmtTime(lastUpdate.createdAt)}</p>
-            </div>
-          ) : (
-            <p className="muted small" style={{ marginTop: 10 }}>No updates submitted yet.</p>
-          )}
-        </div>
-
-        <div className="panel">
-          <h3>Mobility Timeline</h3>
-          {mine.length === 0 ? <p className="muted small">No check-ins available.</p> : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginTop: 10 }}>
-              {mine.map(m => <div key={m.id} style={{ borderBottom: '1px solid var(--line)', paddingBottom: 8 }}>
-                <b>{m.destination}</b> — <span className="small muted">{m.occupation}</span>
-                <div className="small muted">{fmtTime(m.createdAt)} · Confidence: {m.confidenceScore || 85}%</div>
-              </div>)}
-            </div>
-          )}
-        </div>
+      <div className="panel"><h3>Your complaints</h3>
+        {mine.length === 0 ? <p className="empty">You have not filed any complaints.</p> :
+          <ul className="timeline">{mine.map(c => <li key={c.id}><div className="what"><b>{c.id} · {c.category}</b>
+            <span className="small muted">{fmtTime(c.createdAt)} · {c.location || "no location"}</span>
+            <div className="small" style={{ margin:"4px 0" }}>{c.description}</div>
+            <span className={"badge b-" + c.priority}>{c.priority}</span> <span className={"badge b-" + (c.status === "In review" ? "review" : c.status)}>{c.status}</span>
+            <div className="small muted" style={{ marginTop:4 }}>Priority set by {c.source}: {c.reason}</div></div>
+            {c.photo && <img className="thumb" style={{ width:48, height:48 }} src={c.photo} alt="Evidence" />}</li>)}</ul>}
       </div>
     </div>
   </div></div>;
 }
 
 /* =====================================================================
-   8 & 9. Government Schemes & Voice Recommendation
+   Admin dashboard
    ===================================================================== */
-const SCHEMES = [
-  { id: 1, category: "Pension", name: "PM Shram Yogi Maandhan (PM-SYM)", desc: "Voluntary pension scheme for unorganised workers providing ₹3,000 monthly pension after age 60.", benefit: "₹3,000 / month pension", forWho: "Unorganised workers aged 18-40", url: "https://maandhan.in" },
-  { id: 2, category: "Health", name: "Ayushman Bharat PM-JAY", desc: "Free healthcare coverage up to ₹5 Lakh per family per year for secondary & tertiary hospitalisation.", benefit: "Health insurance up to ₹5 Lakh", forWho: "Low income migrant families", url: "https://pmjay.gov.in" },
-  { id: 3, category: "Housing", name: "PM Awas Yojana (PMAY-U / Rental Housing)", desc: "Affordable Rental Housing Complexes (ARHCs) for urban migrants and poor near work sites.", benefit: "Affordable housing & rent subsidy", forWho: "Migrant industrial workers & urban poor", url: "https://pmaymis.gov.in" },
-  { id: 4, category: "Financial Support", name: "eShram Accidental Insurance", desc: "Accidental death or permanent disability coverage up to ₹2 Lakh for registered eShram workers.", benefit: "₹2 Lakh insurance cover", forWho: "All active eShram card holders", url: "https://eshram.gov.in" },
-  { id: 5, category: "Employment", name: "eShram Job Matching & NCS Portal", desc: "National Career Service integration connecting workers with verified employers across India.", benefit: "Direct job opportunities", forWho: "Migrant job seekers", url: "https://www.ncs.gov.in" },
-  { id: 6, category: "Skill Development", name: "PM Kaushal Vikas Yojana (PMKVY)", desc: "Free skill training and certification to increase employability and wage potential.", benefit: "Free certified skill training", forWho: "Youth and construction workers", url: "https://www.pmkvyofficial.org" }
+const RANK = { Critical:0, High:1, Medium:2, Low:3 };
+const count = (arr, fn) => Object.entries(arr.reduce((m, x) => { const k = fn(x) || "Unspecified"; m[k] = (m[k] || 0) + 1; return m; }, {})).sort((a, b) => b[1] - a[1]);
+function Admin() {
+  const { data, reload, toast } = useApp();
+  const [tab, setTab] = useState("overview"); const [pf, setPf] = useState("All"); const [busyId, setBusyId] = useState("");
+  const all = useMemo(() => [...data.checkins, ...data.queue], [data]);
+  const latest = useMemo(() => Object.values(all.reduce((m, c) => { if (!m[c.uan] || c.createdAt > m[c.uan].createdAt) m[c.uan] = c; return m; }, {})), [all]);
+  const markers = latest.filter(c => c.lat != null).map(c => ({ lat:c.lat, lng:c.lng, color:INTENT_COLOR[c.intent] || "#7A8194", r:8,
+    popup:`<b>${esc(c.name)}</b><br>${esc(c.destination)}${c.state ? ", " + esc(c.state) : ""}<br>${esc(c.jobType)} · ${esc(INTENT[c.intent])}<br>${fmtTime(c.createdAt)}` }));
+  const complaints = [...data.complaints].sort((a, b) => RANK[a.priority] - RANK[b.priority] || b.createdAt - a.createdAt);
+  const shown = complaints.filter(c => pf === "All" || c.priority === pf);
+  const open = complaints.filter(c => c.status !== "Resolved");
+  const setStatus = async (c, status) => { await DB.put("complaints", { ...c, status }); await reload(); toast(c.id + " → " + status); };
+  const rerun = async (c) => { setBusyId(c.id); const p = await checkPriority(c.description, c.category); await DB.put("complaints", { ...c, ...p }); await reload(); setBusyId(""); toast(c.id + ": priority " + p.priority + " (" + p.source + ")"); };
+  const exportCSV = () => {
+    const q = (v) => '"' + String(v ?? "").replace(/"/g, '""') + '"';
+    const rows = [["Time","Worker","UAN","Destination","State","Work type","Status","Sync"], ...all.map(c => [new Date(c.createdAt).toISOString(), c.name, c.uan, c.destination, c.state, c.jobType, INTENT[c.intent], c.status])];
+    const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([rows.map(r => r.map(q).join(",")).join("\n")], { type:"text/csv" })); a.download = "shram-sanchar-checkins.csv"; a.click();
+  };
+  return <div className="page"><div className="wrap">
+    <div className="page-head"><div><h2>Officer dashboard</h2><p>Latest confirmed milestone per worker. Nothing here is a live track.</p></div><button className="btn ghost sm" onClick={exportCSV}>Export check-ins (CSV)</button></div>
+    <div className="kpis">
+      <div className="kpi"><b>{latest.length}</b><span>Workers with a check-in</span></div>
+      <div className="kpi"><b>{data.checkins.length}</b><span>Synced check-ins</span></div>
+      <div className="kpi"><b>{open.length}</b><span>Open complaints</span></div>
+      <div className="kpi"><b>{open.filter(c => c.priority === "Critical").length}</b><span>Critical, unresolved</span></div>
+    </div>
+    <div className="tabs">{[["overview","Overview"],["complaints","Complaints"],["checkins","Check-ins"]].map(([k, l]) => <button key={k} className={tab === k ? "on" : ""} onClick={() => setTab(k)}>{l}</button>)}</div>
+
+    {tab === "overview" && <div className="cols wide">
+      <div className="panel"><h3>Where workers are now</h3><p className="small muted" style={{ marginBottom:12 }}>Click a dot for details.</p>
+        <MapView markers={markers} height={440} />
+        <div className="legend">{Object.entries(INTENT).filter(([k]) => k !== "other").map(([k, v]) => <span key={k}><i style={{ background:INTENT_COLOR[k] }} />{v}</span>)}</div></div>
+      <div className="stack">
+        <div className="panel"><h3>Top destinations</h3><Bars items={count(latest, c => c.destination).slice(0, 6)} /></div>
+        <div className="panel"><h3>Work types</h3><Bars green items={count(latest, c => c.jobType).slice(0, 6)} /></div>
+      </div></div>}
+
+    {tab === "complaints" && <><div className="tabs">{["All","Critical","High","Medium","Low"].map(p => <button key={p} className={pf === p ? "on" : ""} onClick={() => setPf(p)}>{p}</button>)}</div>
+      <div className="tbl-wrap"><table><thead><tr><th>Ticket</th><th>Priority</th><th>Complaint</th><th>Route to</th><th>Status</th><th></th></tr></thead><tbody>
+        {shown.map(c => <tr key={c.id}><td><b>{c.id}</b><br /><span className="small muted">{fmtTime(c.createdAt)}</span></td>
+          <td><span className={"badge b-" + c.priority}>{c.priority}</span><div className="small muted" style={{ maxWidth:160 }}>{c.source}</div></td>
+          <td style={{ minWidth:260 }}><b>{c.category}</b> · <span className="small muted">{c.name}, {c.location || "—"}</span><div>{c.description}</div><div className="small muted" style={{ marginTop:4 }}>{c.reason}</div>{c.action && <div className="small" style={{ marginTop:2 }}>Next step: {c.action}</div>}{c.photo && <img className="thumb" style={{ marginTop:6 }} src={c.photo} alt="Evidence" />}</td>
+          <td>{c.department}</td>
+          <td><select value={c.status} onChange={e => setStatus(c, e.target.value)} style={{ width:"auto" }}>{["Open","In review","Resolved"].map(s => <option key={s}>{s}</option>)}</select></td>
+          <td><button className="btn ghost sm" disabled={busyId === c.id} onClick={() => rerun(c)}>{busyId === c.id ? "Checking…" : "Re-check priority"}</button></td></tr>)}
+        {!shown.length && <tr><td colSpan="6" className="empty">No complaints in this view.</td></tr>}</tbody></table></div></>}
+
+    {tab === "checkins" && <div className="tbl-wrap"><table><thead><tr><th>Time</th><th>Worker</th><th>Destination</th><th>Work type</th><th>Status</th><th>Sync</th></tr></thead><tbody>
+      {[...all].sort((a, b) => b.createdAt - a.createdAt).map(c => <tr key={c.id}><td>{fmtTime(c.createdAt)}</td><td>{c.name}<br /><span className="small muted">UAN ••••{c.uan.slice(-4)}</span></td>
+        <td>{c.destination}{c.state ? ", " + c.state : ""}</td><td>{c.jobType || "—"}</td><td>{INTENT[c.intent]}</td><td><span className={"badge b-" + c.status}>{c.status === "queued" ? "Queued on device" : "Synced"}</span></td></tr>)}
+      {!all.length && <tr><td colSpan="6" className="empty">No check-ins yet.</td></tr>}</tbody></table></div>}
+  </div></div>;
+}
+
+/* =====================================================================
+   Chat assistant (Gemini) + AI settings
+   ===================================================================== */
+const FAQ = [
+  [/uan|register|card|e-?shram/i, "Your UAN is the 12-digit Universal Account Number on your e-Shram card. It stays the same across states. To register or fix details, visit eshram.gov.in or call the e-Shram helpline 14434."],
+  [/wage|salary|paid|pay/i, "If wages are unpaid, note the employer name, site and dates, then file a complaint in the Complaint desk. You can also call the e-Shram helpline 14434 or approach your District Labour Office."],
+  [/danger|threat|violence|beat|trapped|emergency/i, "If you are in danger, call 112 right now. For women in distress call 181, and for children 1098."],
+  [/location|privacy|gps|track/i, "Shram Sanchar never tracks you continuously. Location is read only when you turn on check-in for a trip and confirm a check-in, and it is rounded to about 1 km. You can delete your check-ins anytime."],
 ];
-
-function GovernmentSchemes() {
-  const [selectedCat, setSelectedCat] = useState("All");
-  const [voiceQuery, setVoiceQuery] = useState("");
-  const [aiRecommendation, setAiRecommendation] = useState(null);
-  const [busy, setBusy] = useState(false);
-
-  const categories = ["All", "Financial Support", "Health", "Housing", "Employment", "Skill Development", "Pension"];
-
-  const handleSchemeVoiceSearch = async () => {
-    if (!voiceQuery.trim()) return;
-    setBusy(true);
-    const result = await callRecommendScheme(voiceQuery);
-    setAiRecommendation(result);
-    if (result.category) setSelectedCat(result.category);
+function Chat() {
+  const { user } = useApp();
+  const [open, setOpen] = useState(false); const [busy, setBusy] = useState(false); const [q, setQ] = useState("");
+  const [msgs, setMsgs] = useState([{ role:"bot", text:"Namaste! I can help with eShram, your check-ins, wages and complaints. Ask in any language." }]);
+  const end = useRef();
+  useEffect(() => { end.current && end.current.scrollIntoView({ block:"end" }); }, [msgs, open]);
+  const send = async (text) => {
+    text = (text ?? q).trim(); if (!text || busy) return; setQ(""); const next = [...msgs, { role:"me", text }]; setMsgs(next); setBusy(true);
+    const system = `You are the Shram Sanchar assistant for Indian migrant and unorganised workers using the eShram portal. Reply in the same language the user writes in, in short, plain, respectful sentences (max 5 lines). Help with: eShram/UAN registration and updates, how check-ins work (opt-in, milestone-based, offline-first, consent-first), unpaid wages, workplace safety, and filing a complaint in this app's Complaint desk. For emergencies say call 112; e-Shram helpline is 14434; women helpline 181; Childline 1098. Never invent scheme amounts, dates or legal claims — if unsure, point to eshram.gov.in or the helpline. ${user ? "The user's name is " + user.name + "." : ""}`;
+    try {
+      const contents = next.filter((m, i) => i > 0).map(m => ({ role: m.role === "me" ? "user" : "model", parts:[{ text:m.text }] }));
+      const reply = await gemini({ system, contents });
+      setMsgs(m => [...m, { role:"bot", text: reply || "Sorry, I could not answer that." }]);
+    } catch (e) {
+      const hit = FAQ.find(x => x[0].test(text));
+      const why = e.message === "NO_KEY" ? "Add your Gemini key in AI settings for full answers." : e.message === "OFFLINE" ? "You are offline, so I am using saved answers." : "The AI is unavailable right now (" + e.message + ").";
+      setMsgs(m => [...m, { role:"bot", text:(hit ? hit[1] : "For any eShram question, call the helpline 14434 or visit eshram.gov.in.") + "\n\n" + why }]);
+    }
     setBusy(false);
   };
-
-  const filtered = selectedCat === "All" ? SCHEMES : SCHEMES.filter(s => s.category === selectedCat);
-
-  return <div className="page"><div className="wrap">
-    <div className="page-head">
-      <div>
-        <h2>🏛️ Government Schemes</h2>
-        <p className="muted">Explore official government welfare and social security programs for migrant workers.</p>
-      </div>
-    </div>
-
-    {/* Voice Search for Schemes */}
-    <div className="panel" style={{ marginBottom: 20, background: 'var(--navy-3)' }}>
-      <h3>🎙️ Ask AI about Schemes</h3>
-      <p className="muted small" style={{ marginBottom: 10 }}>Say something like: "Mujhe pension chahiye" or "Bimari ke liye medical insurance"</p>
-      <div className="row">
-        <input value={voiceQuery} onChange={e => setVoiceQuery(e.target.value)} placeholder="Type or ask about schemes..." />
-        <button className="btn primary" onClick={handleSchemeVoiceSearch} disabled={busy}>
-          {busy ? "Finding..." : "Find Schemes"}
-        </button>
-      </div>
-      {aiRecommendation && <div style={{ marginTop: 12, padding: 10, background: '#fff', borderRadius: 'var(--r-sm)' }}>
-        <b>Suggested Category: {aiRecommendation.category}</b>
-        <p className="small muted">{aiRecommendation.explanation}</p>
-      </div>}
-    </div>
-
-    {/* Category Tabs */}
-    <div className="tabs">
-      {categories.map(c => <button key={c} className={selectedCat === c ? "on" : ""} onClick={() => setSelectedCat(c)}>{c}</button>)}
-    </div>
-
-    {/* Scheme Cards */}
-    <div className="scheme-grid">
-      {filtered.map(s => <div key={s.id} className="scheme-card">
-        <div>
-          <span className="scheme-tag">{s.category}</span>
-          <h4>{s.name}</h4>
-          <p className="muted small" style={{ margin: '8px 0' }}>{s.desc}</p>
-          <p className="small"><b>For:</b> {s.forWho}</p>
-          <p className="small"><b>Benefit:</b> {s.benefit}</p>
-        </div>
-        <div style={{ marginTop: 16, borderTop: '1px solid var(--line)', paddingTop: 10, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <a className="btn ghost sm" href={s.url} target="_blank" rel="noopener">Visit Official Website ↗</a>
-          <ReadAloud text={`${s.name}. ${s.desc}. Benefit: ${s.benefit}`} />
-        </div>
-      </div>)}
-    </div>
-
-    <p className="muted small" style={{ marginTop: 24, textAlign: 'center' }}>
-      Disclaimer: You may be eligible for these schemes. Please check official criteria on government portals before applying.
-    </p>
-  </div></div>;
+  return <>
+    {open && <div className="chat" role="dialog" aria-label="Assistant">
+      <header><b>Shram Sahayak</b><button onClick={() => setOpen(false)} aria-label="Close chat"><Icon n="x" /></button></header>
+      <div className="msgs">{msgs.map((m, i) => <div key={i} className={"msg " + m.role}>{m.text}</div>)}{busy && <div className="msg bot">Thinking…</div>}<div ref={end} /></div>
+      {msgs.length < 3 && <div className="chips">{["What is a UAN?","My wages are unpaid","Is my location tracked?"].map(s => <button key={s} onClick={() => send(s)}>{s}</button>)}</div>}
+      <form onSubmit={e => { e.preventDefault(); send(); }}><input value={q} onChange={e => setQ(e.target.value)} placeholder="Type your question" aria-label="Your question" /><button className="btn primary sm" disabled={busy} aria-label="Send"><Icon n="send" /></button></form>
+    </div>}
+    <button className="chat-fab" onClick={() => setOpen(!open)} aria-label="Open assistant"><Icon n={open ? "x" : "chat"} /></button>
+  </>;
+}
+function SettingsModal({ onClose }) {
+  const { toast } = useApp(); const s = getSettings();
+  const [key, setKey] = useState(s.geminiKey || ""); const [model, setModel] = useState(s.model || GEMINI_MODEL_DEFAULT); const [testing, setTesting] = useState(false);
+  const save = () => { localStorage.setItem("ss_settings", JSON.stringify({ geminiKey:key.trim(), model:model.trim() || GEMINI_MODEL_DEFAULT })); toast("AI settings saved."); onClose(); };
+  const test = async () => {
+    localStorage.setItem("ss_settings", JSON.stringify({ geminiKey:key.trim(), model:model.trim() || GEMINI_MODEL_DEFAULT })); setTesting(true);
+    try { const t = await gemini({ contents:[{ role:"user", parts:[{ text:"Reply with the single word: ready" }] }] }); toast("Gemini says: " + t.trim().slice(0, 40)); }
+    catch (e) { toast("Test failed: " + e.message); } setTesting(false);
+  };
+  const reset = async () => { if (!confirm("Erase all demo data and start over?")) return; indexedDB.deleteDatabase("shram-sanchar"); localStorage.removeItem("ss_seeded"); localStorage.removeItem("ss_consent"); location.reload(); };
+  return <Modal title="AI settings" onClose={onClose}>
+    <p className="small muted" style={{ marginBottom:12 }}>Gemini powers the chat assistant, voice-text understanding and complaint priority check. The key stays in this browser only. Without it, the app falls back to simple on-device rules.</p>
+    <div className="field"><label htmlFor="k">Gemini API key</label><input id="k" type="password" value={key} onChange={e => setKey(e.target.value)} placeholder="Paste your key" autoComplete="off" /></div>
+    <div className="field"><label htmlFor="mo">Model</label><input id="mo" value={model} onChange={e => setModel(e.target.value)} /></div>
+    <div className="acts"><button className="btn danger sm" onClick={reset} style={{ marginRight:"auto" }}>Reset demo data</button>
+      <button className="btn ghost" onClick={test} disabled={testing || !key.trim()}>{testing ? "Testing…" : "Test key"}</button><button className="btn primary" onClick={save}>Save</button></div>
+  </Modal>;
 }
 
 /* =====================================================================
-   10 & 11. Help Centre & Assisted Mode
-   ===================================================================== */
-function HelpCentre() {
-  const { openAssistant } = useApp();
-  return <div className="page"><div className="wrap">
-    <div className="page-head">
-      <div>
-        <h2>🆘 Help Centre</h2>
-        <p className="muted">Simple, accessible assistance for migrant workers and helpers.</p>
-      </div>
-    </div>
-
-    <div className="scheme-grid" style={{ marginBottom: 28 }}>
-      <div className="panel" style={{ cursor: 'pointer' }} onClick={() => openAssistant("How do I update my location?")}>
-        <h3>🎙️ Ask AI Assistant</h3>
-        <p className="muted small" style={{ marginTop: 6 }}>Voice-guided answers for login, location updates, and eShram.</p>
-      </div>
-      <div className="panel" style={{ cursor: 'pointer' }} onClick={() => openAssistant("How do I login with UAN?")}>
-        <h3>🔐 Login Help</h3>
-        <p className="muted small" style={{ marginTop: 6 }}>Learn how to find your UAN and receive your login OTP.</p>
-      </div>
-      <div className="panel" style={{ cursor: 'pointer' }} onClick={() => openAssistant("How does mobility update work?")}>
-        <h3>📍 Mobility Update Help</h3>
-        <p className="muted small" style={{ marginTop: 6 }}>Understand how voluntary consent-first mobility updates protect your privacy.</p>
-      </div>
-      <div className="panel" style={{ cursor: 'pointer' }} onClick={() => openAssistant("Where can I find eShram details?")}>
-        <h3>📱 eShram Help</h3>
-        <p className="muted small" style={{ marginTop: 6 }}>Information regarding official helpline 14434 and CSC centers.</p>
-      </div>
-    </div>
-
-    {/* Assisted Mode */}
-    <div className="panel" style={{ background: 'var(--amber-2)', borderColor: 'var(--saffron)' }}>
-      <h3>🤝 Need someone to help me? (Assisted Mode)</h3>
-      <p style={{ margin: '8px 0 16px' }}>
-        If you are assisting a worker at a CSC center, NGO camp, or community center:
-      </p>
-      <div className="row">
-        <button className="btn primary" onClick={() => openAssistant("Guide me step by step through login")}>Login Assistance</button>
-        <button className="btn primary" onClick={() => openAssistant("Help me make a mobility update")}>Mobility Update Assistance</button>
-        <a className="btn ghost" href="https://findmycsc.in" target="_blank" rel="noopener">Find Nearest CSC Center ↗</a>
-      </div>
-    </div>
-  </div></div>;
-}
-
-/* =====================================================================
-   15. Protected Admin / Government Dashboard
-   ===================================================================== */
-function AdminDashboard() {
-  const { data } = useApp();
-  const all = data.checkins.concat(data.queue);
-
-  return <div className="page"><div className="wrap">
-    <div className="page-head">
-      <div>
-        <h2>🏛️ Government / Admin Dashboard</h2>
-        <p className="muted">Aggregated mobility insights — No continuous tracking trails.</p>
-      </div>
-      <span className="badge b-Medium">Sandbox / Mock Data</span>
-    </div>
-
-    <div className="kpis">
-      <div className="kpi"><b>{all.length}</b><span>Total Mobility Updates</span></div>
-      <div className="kpi"><b>{data.checkins.length}</b><span>Synced to eShram</span></div>
-      <div className="kpi"><b>{data.queue.length}</b><span>Pending Sync</span></div>
-      <div className="kpi"><b>88%</b><span>Avg. Data Confidence</span></div>
-    </div>
-
-    <div className="cols even">
-      <div className="panel">
-        <h3>Top Destination States</h3>
-        <ul style={{ paddingLeft: 20, margin: '10px 0' }}>
-          <li>Gujarat (Surat) — 38%</li>
-          <li>Maharashtra (Pune/Mumbai) — 26%</li>
-          <li>Haryana (Gurugram) — 18%</li>
-          <li>Karnataka (Bengaluru) — 12%</li>
-        </ul>
-      </div>
-
-      <div className="panel">
-        <h3>Occupation Breakdown</h3>
-        <ul style={{ paddingLeft: 20, margin: '10px 0' }}>
-          <li>Construction Workers — 45%</li>
-          <li>Factory Workers — 30%</li>
-          <li>Delivery / Logistics — 15%</li>
-          <li>Agriculture Workers — 10%</li>
-        </ul>
-      </div>
-    </div>
-
-    <div className="panel" style={{ marginTop: 20 }}>
-      <h3>Recent Worker-Confirmed Mobility Logs</h3>
-      <table style={{ width: '100%', marginTop: 10, fontSize: '.9rem' }}>
-        <thead>
-          <tr style={{ borderBottom: '1px solid var(--line)', textAlign: 'left' }}>
-            <th>Worker</th><th>Destination</th><th>Occupation</th><th>Confidence</th><th>Status</th>
-          </tr>
-        </thead>
-        <tbody>
-          {all.slice(0, 5).map(item => <tr key={item.id} style={{ borderBottom: '1px solid var(--line)' }}>
-            <td style={{ padding: '8px 0' }}>{item.name}</td>
-            <td>{item.destination}</td>
-            <td>{item.occupation || item.jobType}</td>
-            <td><b>{item.confidenceScore || 85}%</b></td>
-            <td><span className="badge b-synced">{item.status || "Synced"}</span></td>
-          </tr>)}
-          {all.length === 0 && <tr><td colSpan="5" className="muted" style={{ padding: 12 }}>No logs available in sandbox.</td></tr>}
-        </tbody>
-      </table>
-    </div>
-  </div></div>;
-}
-
-/* =====================================================================
-   Root App Component & Floating Assistant
+   App root
    ===================================================================== */
 function App() {
   const [route, setRoute] = useState(parseHash());
   const [user, setUser] = useState(() => { try { return JSON.parse(localStorage.getItem("ss_user") || "null"); } catch { return null; } });
   const [data, setData] = useState({ queue:[], checkins:[], complaints:[] });
-  const [sim, setSimState] = useState(false);
-  const [netOn, setNetOn] = useState(navigator.onLine);
-  const [toasts, setToasts] = useState([]);
-  
-  // Chat Drawer State
-  const [chatOpen, setChatOpen] = useState(false);
-  const [chatMsgs, setChatMsgs] = useState([{ role:"bot", text:"Namaste! I am Shram Sahayak. How can I help you today?" }]);
-  const [chatInput, setChatInput] = useState("");
-  const [chatBusy, setChatBusy] = useState(false);
-
+  const [sim, setSimState] = useState(false); const [netOn, setNetOn] = useState(navigator.onLine);
+  const [toasts, setToasts] = useState([]); const [settings, setSettings] = useState(false);
   const online = netOn && !sim;
 
-  const reload = useCallback(async () => {
-    const [queue, checkins, complaints] = await Promise.all([DB.all("queue"), DB.all("checkins"), DB.all("complaints")]);
-    setData({ queue, checkins, complaints });
-  }, []);
+  const reload = useCallback(async () => { const [queue, checkins, complaints] = await Promise.all([DB.all("queue"), DB.all("checkins"), DB.all("complaints")]); setData({ queue, checkins, complaints }); }, []);
+  const toast = useCallback((m) => { const id = uid(); setToasts(t => [...t, { id, m }]); setTimeout(() => setToasts(t => t.filter(x => x.id !== id)), 4200); }, []);
+  const setSim = (v) => { net.forced = v; setSimState(v); toast(v ? "Network switched off (simulated)." : "Network is back."); };
+  const logout = () => { localStorage.removeItem("ss_user"); setUser(null); go("home"); };
 
-  const toast = useCallback((m) => {
-    const id = uid(); setToasts(t => [...t, { id, m }]);
-    setTimeout(() => setToasts(t => t.filter(x => x.id !== id)), 4200);
-  }, []);
-
-  const setSim = (v) => {
-    net.forced = v; setSimState(v);
-    toast(v ? "Simulating Offline Mode" : "Online Mode Restored");
-  };
-
-  const logout = () => {
-    localStorage.removeItem("ss_user");
-    setUser(null);
-    go("home");
-  };
-
-  useEffect(() => {
-    reload();
-    const h = () => setRoute(parseHash());
-    addEventListener("hashchange", h);
-    const on = () => setNetOn(true), off = () => setNetOn(false);
-    addEventListener("online", on); addEventListener("offline", off);
-    return () => { removeEventListener("hashchange", h); removeEventListener("online", on); removeEventListener("offline", off); };
-  }, []);
-
-  const openAssistant = (initialPrompt) => {
-    setChatOpen(true);
-    if (initialPrompt) {
-      sendChatMessage(initialPrompt);
-    }
-  };
-
-  const sendChatMessage = async (text) => {
-    const query = (text || chatInput).trim();
-    if (!query || chatBusy) return;
-    
-    setChatInput("");
-    const newMsgs = [...chatMsgs, { role: "me", text: query }];
-    setChatMsgs(newMsgs);
-    setChatBusy(true);
-
-    const reply = await callAiAssistant(query, newMsgs, user, "hi-IN");
-    setChatMsgs([...newMsgs, { role: "bot", text: reply }]);
-    setChatBusy(false);
-  };
+  useEffect(() => { seed().then(reload); const h = () => setRoute(parseHash()); addEventListener("hashchange", h);
+    const on = () => setNetOn(true), off = () => setNetOn(false); addEventListener("online", on); addEventListener("offline", off);
+    return () => { removeEventListener("hashchange", h); removeEventListener("online", on); removeEventListener("offline", off); }; }, []);
+  useEffect(() => { if (online && data.queue.length) syncQueue().then(n => { if (n) { toast(`Back online: ${n} queued check-in${n > 1 ? "s" : ""} synced.`); } reload(); }); }, [online, data.queue.length]);
 
   let page;
   if (route === "home") page = <Home />;
   else if (route === "login") page = <Login />;
-  else if (route === "worker") page = user ? <WorkerDashboard /> : <Login next="worker" />;
-  else if (route === "schemes") page = <GovernmentSchemes />;
-  else if (route === "help") page = <HelpCentre />;
-  else if (route === "jobs") page = <HelpCentre />;
-  else if (route === "admin") page = <AdminDashboard />;
+  else if (route === "worker") page = user?.role === "citizen" ? <Worker /> : <Login next="worker" need="citizen" />;
+  else if (route === "complaints") page = user?.role === "citizen" ? <Complaints /> : <Login next="complaints" need="citizen" />;
+  else if (route === "admin") page = user?.role === "admin" ? <Admin /> : <Login next="admin" need="admin" />;
   else page = <Home />;
 
-  return <AppCtx.Provider value={{ user, setUser, logout, data, reload, online, sim, setSim, toast, openAssistant }}>
-    <Nav route={route} />
-    {page}
-    <GovFooter />
-
-    {/* Floating Ask Assistant Button */}
-    <button className="ask-fab" onClick={() => setChatOpen(!chatOpen)}>
-      🎙️ Ask Assistant
-    </button>
-
-    {/* Chat Assistant Drawer */}
-    {chatOpen && <div className="chat-drawer">
-      <header>
-        <b>🎙️ Shram Sahayak (AI Assistant)</b>
-        <button style={{ background:'none', border:'none', color:'#fff', cursor:'pointer' }} onClick={() => setChatOpen(false)}>✕</button>
-      </header>
-      <div className="msgs">
-        {chatMsgs.map((m, i) => <div key={i} className={"msg " + m.role}>
-          {m.text}
-          {m.role === "bot" && <ReadAloud text={m.text} />}
-        </div>)}
-        {chatBusy && <div className="msg bot">Thinking...</div>}
-      </div>
-      <form style={{ display:'flex', padding: 10, gap: 6, borderTop:'1px solid var(--line)' }} onSubmit={e => { e.preventDefault(); sendChatMessage(); }}>
-        <input value={chatInput} onChange={e => setChatInput(e.target.value)} placeholder="Ask anything..." />
-        <button className="btn primary sm" disabled={chatBusy}>Send</button>
-      </form>
-    </div>}
-
-    <div className="toasts">{toasts.map(t => <div className="toast" key={t.id}>{t.m}</div>)}</div>
+  return <AppCtx.Provider value={{ user, setUser, logout, data, reload, online, sim, setSim, toast, openSettings:() => setSettings(true) }}>
+    <Nav route={route} />{page}<GovFooter /><Chat />
+    {settings && <SettingsModal onClose={() => setSettings(false)} />}
+    <div className="toasts" aria-live="polite">{toasts.map(t => <div className="toast" key={t.id}>{t.m}</div>)}</div>
   </AppCtx.Provider>;
 }
-
 ReactDOM.createRoot(document.getElementById("root")).render(<App />);
 </script>
 </body>
 </html>
+
