@@ -604,14 +604,13 @@ function Bars({ items, green }) {
    Nav + Footer
    ===================================================================== */
 function Nav({ route }) {
-  const { user, online, logout, openSettings } = useApp();
+  const { user, online, logout } = useApp();
   const L_ = [["home","Home"],["worker","Worker app"],["complaints","Complaint desk"],["admin","Admin"]];
   return <><div className="tri" /><nav className="nav"><div className="wrap">
     <a className="brand" href="#/home"><span className="mark"><Icon n="pin" /></span>Shram Sanchar</a>
     <div className="nav-links">{L_.map(([k, l]) => <a key={k} href={"#/" + k} className={route === k ? "on" : ""}>{l}</a>)}</div>
     <div className="nav-right">
       <span className={"pill " + (online ? "on" : "off")}><Icon n={online ? "wifi" : "wifioff"} />{online ? "Online" : "Offline"}</span>
-      <button className="btn ghost sm" onClick={openSettings}>AI settings</button>
       {user ? <><span className="small muted" style={{ maxWidth:110, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{user.name}</span><button className="btn ghost sm" onClick={logout}>Log out</button></>
             : <a className="btn primary sm" href="#/login">Log in</a>}
     </div></div></nav></>;
@@ -1110,7 +1109,7 @@ function App() {
   const [user, setUser] = useState(() => { try { return JSON.parse(localStorage.getItem("ss_user") || "null"); } catch { return null; } });
   const [data, setData] = useState({ queue:[], checkins:[], complaints:[] });
   const [sim, setSimState] = useState(false); const [netOn, setNetOn] = useState(navigator.onLine);
-  const [toasts, setToasts] = useState([]); const [settings, setSettings] = useState(false);
+  const [toasts, setToasts] = useState([]);
   const online = netOn && !sim;
 
   const reload = useCallback(async () => { const [queue, checkins, complaints] = await Promise.all([DB.all("queue"), DB.all("checkins"), DB.all("complaints")]); setData({ queue, checkins, complaints }); }, []);
@@ -1131,9 +1130,8 @@ function App() {
   else if (route === "admin") page = user?.role === "admin" ? <Admin /> : <Login next="admin" need="admin" />;
   else page = <Home />;
 
-  return <AppCtx.Provider value={{ user, setUser, logout, data, reload, online, sim, setSim, toast, openSettings:() => setSettings(true) }}>
+  return <AppCtx.Provider value={{ user, setUser, logout, data, reload, online, sim, setSim, toast }}>
     <Nav route={route} />{page}<GovFooter /><Chat />
-    {settings && <SettingsModal onClose={() => setSettings(false)} />}
     <div className="toasts" aria-live="polite">{toasts.map(t => <div className="toast" key={t.id}>{t.m}</div>)}</div>
   </AppCtx.Provider>;
 }
