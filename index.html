@@ -948,6 +948,23 @@ const CATS = ["Wages unpaid","Unsafe working conditions","Harassment","Accommoda
 function Complaints() {
   const { user, data, reload, toast } = useApp();
   const [f, setF] = useState({ category:CATS[0], description:"", location:"" }); const [photo, setPhoto] = useState(null); const [busy, setBusy] = useState(false); const [last, setLast] = useState(null); const [err, setErr] = useState("");
+  const [listening, setListening] = useState(false);
+  const rec = useRef();
+
+  const startListenComplaint = () => {
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SR) return toast("Voice input needs Chrome or Edge.");
+    if (listening) { rec.current && rec.current.stop(); return; }
+    const r = new SR(); r.lang = "hi-IN"; r.interimResults = true; r.continuous = false;
+    r.onresult = (e) => {
+      let t = ""; for (let i = 0; i < e.results.length; i++) t += e.results[i][0].transcript;
+      setF(prev => ({ ...prev, description: t }));
+    };
+    r.onerror = (e) => { setListening(false); toast("Voice error: " + e.error); };
+    r.onend = () => setListening(false);
+    rec.current = r; r.start(); setListening(true);
+  };
+
   const submit = async (e) => {
     e.preventDefault(); setErr("");
     if (f.description.trim().length < 15) return setErr("Please describe the problem in at least a sentence or two.");
@@ -976,7 +993,15 @@ function Complaints() {
               <option value="Low">Low (General Query / Feedback)</option>
             </select>
           </div>
-          <div className="field"><label htmlFor="ds">What happened?</label><textarea id="ds" value={f.description} onChange={e => setF({ ...f, description:e.target.value })} placeholder="Say when, where and who was involved. You can write in any language." /></div>
+          <div className="field">
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px" }}>
+              <label htmlFor="ds" style={{ margin: 0 }}>What happened?</label>
+              <button type="button" className={"btn " + (listening ? "danger" : "ghost") + " sm"} onClick={startListenComplaint} style={{ padding: "4px 10px", fontSize: ".82rem" }}>
+                <Icon n="mic" /> {listening ? "Listening…" : "🎙️ Speak Complaint"}
+              </button>
+            </div>
+            <textarea id="ds" value={f.description} onChange={e => setF({ ...f, description:e.target.value })} placeholder="Say when, where and who was involved. You can speak or write in any language." />
+          </div>
           <div className="field"><label htmlFor="lc">Where (city / site)</label><input id="lc" value={f.location} onChange={e => setF({ ...f, location:e.target.value })} placeholder="Surat, GJ — Vesu construction site" /></div>
           <div className="field"><label>Photo or evidence (optional)</label><PhotoField photo={photo} setPhoto={setPhoto} /></div>
           {err && <p className="err">{err}</p>}
