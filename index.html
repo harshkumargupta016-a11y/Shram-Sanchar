@@ -595,7 +595,7 @@ function Bars({ items, green }) {
    ===================================================================== */
 function Nav({ route }) {
   const { user, online, logout } = useApp();
-  const L_ = [["home","Home"],["worker","Worker app"],["complaints","Complaint desk"],["admin","Admin"]];
+  const L_ = [["home","Home"],["worker","Worker app"],["schemes","Government Schemes"],["help","Help & FAQs"],["complaints","Complaint desk"],["admin","Admin"]];
   const [lang, setLang] = useState("en");
 
   const changeLanguage = (e) => {
@@ -1001,6 +1001,109 @@ function Complaints() {
 }
 
 /* =====================================================================
+   Government Schemes Page
+   ===================================================================== */
+const ALL_SCHEMES = [
+  { id: "s1", category: "Pension", name: "Pradhan Mantri Shram Yogi Maandhan (PM-SYM)", desc: "Voluntary & contributory pension scheme providing ₹3,000 monthly pension after reaching 60 years of age.", forWho: "Unorganised workers aged 18 to 40 with monthly income <= ₹15,000", benefit: "₹3,000 / month guaranteed pension", url: "https://maandhan.in" },
+  { id: "s2", category: "Health", name: "Ayushman Bharat PM-JAY", desc: "World's largest health assurance scheme providing health cover of ₹5 Lakh per family per year for secondary and tertiary care hospitalization.", forWho: "Low-income migrant worker families and unorganised workers", benefit: "Cashless health cover up to ₹5 Lakh/year", url: "https://pmjay.gov.in" },
+  { id: "s3", category: "Housing", name: "Affordable Rental Housing Complexes (ARHCs / PMAY)", desc: "Dignified and affordable rental housing near workplace sites for urban migrants and industrial labor.", forWho: "Urban migrants, construction workers, and factory labor", benefit: "Affordable rental housing near work hubs", url: "https://pmaymis.gov.in" },
+  { id: "s4", category: "Financial Support", name: "eShram Accidental Death & Disability Cover", desc: "Free accidental death and disability coverage for active eShram registered workers.", forWho: "All active eShram cardholders aged 16 to 59", benefit: "₹2 Lakh for death/disability, ₹1 Lakh for partial disability", url: "https://eshram.gov.in" },
+  { id: "s5", category: "Employment", name: "National Career Service (NCS) Portal", desc: "Nationwide job matching platform connecting migrant job seekers with verified employers across states.", forWho: "Unorganised workers & job seekers", benefit: "Direct job vacancy matching & skill mapping", url: "https://www.ncs.gov.in" },
+  { id: "s6", category: "Skill Development", name: "Pradhan Mantri Kaushal Vikas Yojana (PMKVY)", desc: "Free industry-relevant skill training and Recognition of Prior Learning (RPL) certification.", forWho: "Youth and unorganised sector workers", benefit: "Free skill training, certification & stipend", url: "https://www.pmkvyofficial.org" }
+];
+
+function GovernmentSchemesPage() {
+  const [cat, setCat] = useState("All");
+  const cats = ["All", "Financial Support", "Health", "Housing", "Employment", "Skill Development", "Pension"];
+  const list = cat === "All" ? ALL_SCHEMES : ALL_SCHEMES.filter(s => s.category === cat);
+
+  return <div className="page"><div className="wrap">
+    <div className="page-head">
+      <div>
+        <h2>🏛️ Government Welfare Schemes</h2>
+        <p className="muted">Explore social security, pension, health, and housing schemes for unorganised workers.</p>
+      </div>
+    </div>
+
+    <div className="tabs" style={{ marginBottom: 20 }}>
+      {cats.map(c => <button key={c} className={cat === c ? "on" : ""} onClick={() => setCat(c)}>{c}</button>)}
+    </div>
+
+    <div className="grid3">
+      {list.map(s => <div className="panel" key={s.id} style={{ display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+        <div>
+          <span className="badge b-Open" style={{ marginBottom: 8 }}>{s.category}</span>
+          <h3 style={{ fontSize: "1.05rem", color: "var(--navy)", margin: "6px 0" }}>{s.name}</h3>
+          <p className="small muted" style={{ marginBottom: 10 }}>{s.desc}</p>
+          <div className="small" style={{ margin: "4px 0" }}><b>Target Audience:</b> {s.forWho}</div>
+          <div className="small" style={{ margin: "4px 0", color: "var(--green)" }}><b>Key Benefit:</b> {s.benefit}</div>
+        </div>
+        <div style={{ marginTop: 14, paddingTop: 10, borderTop: "1px solid var(--line)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <a className="btn ghost sm" href={s.url} target="_blank" rel="noopener noreferrer">Visit Official Website ↗</a>
+          <ReadAloud text={`${s.name}. ${s.desc}. Key benefit: ${s.benefit}`} />
+        </div>
+      </div>)}
+    </div>
+
+    <p className="small muted" style={{ marginTop: 24, textAlign: "center" }}>
+      Note: Eligibility is verified on official government portals. Shram Sanchar acts as an informational guide for eShram beneficiaries.
+    </p>
+  </div></div>;
+}
+
+/* =====================================================================
+   Help & FAQs Page
+   ===================================================================== */
+const FAQ_LIST = [
+  { q: "What is a UAN (Universal Account Number)?", a: "UAN is a unique 12-digit number assigned to every unorganised worker registered on the eShram portal. It remains valid across all Indian states throughout your lifetime." },
+  { q: "How do I update my work location when I migrate?", a: "Go to 'Worker app', choose your preferred language, and speak or type your destination (e.g. 'I am going to Surat for construction work'). Review the AI interpretation and click 'Confirm check-in'." },
+  { q: "Is my location tracked continuously in the background?", a: "NO. Shram Sanchar NEVER tracks your location continuously. Location is accessed strictly ONCE only when you turn on check-in for a trip and confirm your update. We do not store GPS trails." },
+  { q: "Can I use Shram Sanchar without internet (offline)?", a: "YES. If you have poor or no internet, your check-in is safely saved on your device (IndexedDB) as 'Queued'. As soon as your internet returns, it automatically syncs to the server." },
+  { q: "How do I log into the application?", a: "Enter your full name, 12-digit UAN number, and mobile number on the login page. You will receive an OTP. Enter the OTP code to log in safely. (For demo purposes, the OTP is 123456)." },
+  { q: "What is Data Confidence Score?", a: "Data Confidence Score represents the quality and completeness of a mobility update (+30 worker confirmed, +25 location shared, +20 AI extracted, +10 valid time). It helps verify data accuracy without penalizing workers who decline GPS." },
+  { q: "What should I do if my wages are unpaid?", a: "Go to 'Complaint desk', select 'Wages unpaid', describe the issue, and submit. If the issue is critical or urgent, Gemini AI flags it for officer intervention. You can also call the free helpline 14434." },
+  { q: "How can someone help me if I cannot read or write?", a: "You can click the 🔊 Listen button to hear any instruction read aloud. You can also use voice input to speak in your language, or ask a CSC center volunteer to use Assisted Mode." }
+];
+
+function HelpCentrePage() {
+  const { openSettings } = useApp();
+  return <div className="page"><div className="wrap">
+    <div className="page-head">
+      <div>
+        <h2>🆘 Help Centre & Frequently Asked Questions</h2>
+        <p className="muted">Find answers to common questions about eShram, UAN, mobility updates, privacy, and complaints.</p>
+      </div>
+    </div>
+
+    <div className="grid2" style={{ marginBottom: 24 }}>
+      <div className="panel" style={{ background: "var(--navy-3)" }}>
+        <h3>🎙️ Shram Sahayak (AI Voice Assistant)</h3>
+        <p className="small muted" style={{ margin: "6px 0 12px" }}>Ask questions in any Indian language. Speak or type to get instant answers about UAN, schemes, or worker rights.</p>
+        <ReadAloud text="Namaste! You can ask our AI assistant any question regarding eShram, mobility updates, unpaid wages, or government schemes." />
+      </div>
+      <div className="panel" style={{ background: "var(--amber-2)", borderColor: "var(--saffron)" }}>
+        <h3>🤝 Need Assisted Help?</h3>
+        <p className="small muted" style={{ margin: "6px 0 12px" }}>If you need help at a CSC center or NGO camp, call the official government helplines or contact a local worker representative.</p>
+        <a className="btn primary sm" href="tel:14434">📞 Call eShram Helpline 14434</a>
+      </div>
+    </div>
+
+    <div className="panel">
+      <h3>Frequently Asked Questions (FAQs)</h3>
+      <div style={{ display: "flex", flexDirection: "column", gap: 14, marginTop: 14 }}>
+        {FAQ_LIST.map((faq, i) => <div key={i} style={{ paddingBottom: 12, borderBottom: i < FAQ_LIST.length - 1 ? "1px solid var(--line)" : "none" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 10 }}>
+            <h4 style={{ fontFamily: "var(--sans)", fontSize: "1rem", color: "var(--navy)" }}>Q: {faq.q}</h4>
+            <ReadAloud text={`Question: ${faq.q}. Answer: ${faq.a}`} />
+          </div>
+          <p className="small muted" style={{ marginTop: 6, lineHeight: "1.5" }}>{faq.a}</p>
+        </div>)}
+      </div>
+    </div>
+  </div></div>;
+}
+
+/* =====================================================================
    Admin dashboard
    ===================================================================== */
 const RANK = { Critical:0, High:1, Medium:2, Low:3 };
@@ -1146,6 +1249,8 @@ function App() {
   if (route === "home") page = <Home />;
   else if (route === "login") page = <Login />;
   else if (route === "worker") page = user?.role === "citizen" ? <Worker /> : <Login next="worker" need="citizen" />;
+  else if (route === "schemes") page = <GovernmentSchemesPage />;
+  else if (route === "help") page = <HelpCentrePage />;
   else if (route === "complaints") page = user?.role === "citizen" ? <Complaints /> : <Login next="complaints" need="citizen" />;
   else if (route === "admin") page = user?.role === "admin" ? <Admin /> : <Login next="admin" need="admin" />;
   else page = <Home />;
