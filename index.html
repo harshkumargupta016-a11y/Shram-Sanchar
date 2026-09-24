@@ -302,7 +302,8 @@ const getSettings = () => { try { return JSON.parse(localStorage.getItem("ss_set
 const net = { forced: false };                                   // "simulate offline" switch
 const isOnline = () => navigator.onLine && !net.forced;
 const parseJSON = (t) => JSON.parse(String(t).replace(/```json|```/g, "").trim());
-const speak = (text, lang) => { try { const u = new SpeechSynthesisUtterance(text); u.lang = lang; speechSynthesis.speak(u); } catch {} };
+const stopSpeak = () => { try { if ('speechSynthesis' in window) speechSynthesis.cancel(); } catch {} };
+const speak = (text, lang) => { try { if ('speechSynthesis' in window) { speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(text); u.lang = lang; speechSynthesis.speak(u); } } catch {} };
 
 /* =====================================================================
    IndexedDB  — offline cache (queue) + mock eShram "server" (checkins)
@@ -514,8 +515,20 @@ const Icon = ({ n }) => <svg viewBox="0 0 24 24" fill="none" strokeWidth="2" str
    Shared components
    ===================================================================== */
 function ReadAloud({ text, lang = "hi-IN" }) {
-  return <button type="button" className="btn ghost sm" style={{ padding: "3px 8px", fontSize: ".8rem", display: "inline-flex", alignItems: "center", gap: "4px" }} onClick={() => speak(text, lang)}>
-    🔊 Listen
+  const [speaking, setSpeaking] = useState(false);
+
+  const toggle = () => {
+    if (speaking) {
+      stopSpeak();
+      setSpeaking(false);
+    } else {
+      speak(text, lang);
+      setSpeaking(true);
+    }
+  };
+
+  return <button type="button" className={"btn " + (speaking ? "danger" : "ghost") + " sm"} style={{ padding: "3px 8px", fontSize: ".8rem", display: "inline-flex", alignItems: "center", gap: "4px" }} onClick={toggle}>
+    {speaking ? "✖ Stop" : "🔊 Listen"}
   </button>;
 }
 function Modal({ title, onClose, children }) {
