@@ -1045,7 +1045,13 @@ function Admin() {
       <div className="tbl-wrap"><table><thead><tr><th>Ticket</th><th>Priority</th><th>Complaint</th><th>Route to</th><th>Status</th><th></th></tr></thead><tbody>
         {shown.map(c => <tr key={c.id}><td><b>{c.id}</b><br /><span className="small muted">{fmtTime(c.createdAt)}</span></td>
           <td><span className={"badge b-" + c.priority}>{c.priority}</span><div className="small muted" style={{ maxWidth:160 }}>{c.source}</div></td>
-          <td style={{ minWidth:260 }}><b>{c.category}</b> · <span className="small muted">{c.name}, {c.location || "—"}</span><div>{c.description}</div><div className="small muted" style={{ marginTop:4 }}>{c.reason}</div>{c.action && <div className="small" style={{ marginTop:2 }}>Next step: {c.action}</div>}{c.photo && <img className="thumb" style={{ marginTop:6 }} src={c.photo} alt="Evidence" />}</td>
+          <td style={{ minWidth:260 }}>
+            <b>{c.category}</b> · <span className="small muted">{c.name}, {c.location || "—"}</span>
+            <div style={{ margin:"6px 0", fontStyle:"italic" }}>"{c.description}"</div>
+            {c.reason && <div className="small muted" style={{ marginTop:4 }}><b>AI Assessment:</b> {c.reason}</div>}
+            {c.action && <div className="small" style={{ marginTop:2, color:"var(--navy)" }}><b>Suggested Next Step:</b> {c.action}</div>}
+            {c.photo && <img className="thumb" style={{ marginTop:6 }} src={c.photo} alt="Evidence" />}
+          </td>
           <td>{c.department}</td>
           <td><select value={c.status} onChange={e => setStatus(c, e.target.value)} style={{ width:"auto" }}>{["Open","In review","Resolved"].map(s => <option key={s}>{s}</option>)}</select></td>
           <td><button className="btn ghost sm" disabled={busyId === c.id} onClick={() => rerun(c)}>{busyId === c.id ? "Checking…" : "Re-check priority"}</button></td></tr>)}
