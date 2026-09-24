@@ -376,6 +376,60 @@ async function gemini({ system, contents, json = false }) {
 /* =====================================================================
    Places, extraction, priority (Gemini first, on-device fallback)
    ===================================================================== */
+function detectCategoryFromText(text) {
+  if (!text) return null;
+  const t = text.toLowerCase();
+  
+  if (/working condition|work condition|condition|kandishan|कंडीशन|वर्किंग|स्थिति|माहौल|खराब|सुरक्षा|हादसा|खतरा|unsafe|danger|site/i.test(t)) {
+    return "Unsafe working conditions";
+  }
+  if (/harass|abuse|threat|beat|hit|mar|peet|मार|पीट|धमकी|गाली|परेशान|तंग|शोषण|अत्याचार/i.test(t)) {
+    return "Harassment";
+  }
+  if (/food|shelter|house|room|living|eat|khana|खाना|भोजन|रहने|कमरा|मकान|छत|रोटी|पानी|रहना/i.test(t)) {
+    return "Accommodation or food";
+  }
+  if (/card|uan|eshram|e-shram|इ-श्रम|ई-श्रम|कार्ड|यूएएन|रजिस्ट्रेशन|अपडेट/i.test(t)) {
+    return "eShram card / UAN issue";
+  }
+  if (/wage|salary|unpaid|pay|money|dues|paise|paisa|पैसे|पैसा|वेजेस|सैलरी|मजदूरी|वेतन|भुगतान|दाम/i.test(t)) {
+    return "Wages unpaid";
+  }
+  return null;
+}
+
+// Extract place name (city, state, district) using AI/Gemini or Regex/OSM
+async function extractLocationFromText(text) {
+  if (!text) return null;
+  
+  // 1. First try Gemini AI if key configured / available
+  try {
+    const sysPrompt = `Extract ONLY the Indian city, district, town, or state name mentioned in the following user complaint. Return a JSON object with key "place" (string in English or Hindi, or "" if none found). Text: "${text}"`;
+    const resText = await gemini({ system: sysPrompt, json: true, contents: [{ role: "user", parts: [{ text }] }] });
+    const parsed = parseJSON(resText);
+    if (parsed && parsed.place) {
+      const geo = await resolveDestination(parsed.place);
+      if (geo) return geo;
+      return { name: parsed.place, state: "" };
+    }
+  } catch (e) {}
+
+  // 2. Check local cities database
+  const c = findCity(text);
+  if (c) return c;
+
+  // 3. Match common states & major districts/cities via regex
+  const locRegex = /बिहार|गुजरात|महाराष्ट्र|उत्तर प्रदेश|राजस्थान|मध्य प्रदेश|पंजाब|हरियाणा|पश्चिम बंगाल|झारखंड|ओडिशा|तमिलनाडु|कर्नाटक|केरल|आंध्र प्रदेश|तेलंगाना|असम|छत्तीसगढ़|उत्तराखंड|हिमाचल|bihar|gujarat|maharashtra|up|uttar pradesh|rajasthan|mp|madhya pradesh|punjab|haryana|bengal|jharkhand|odisha|tamil nadu|karnataka|kerala|ap|andhra|telangana|assam|chhattisgarh|delhi|mumbai|surat|pune|patna|gaya|muzaffarpur|darbhanga|bhagalpur|ranchi|dhanbad|kanpur|lucknow|varanasi|agra/i;
+  const match = text.match(locRegex);
+  if (match) {
+    const geo = await resolveDestination(match[0]);
+    if (geo) return geo;
+    return { name: match[0].charAt(0).toUpperCase() + match[0].slice(1), state: "" };
+  }
+
+  // 4. Try resolving cleaned full text via Nominatim
+  return await resolveDestination(text);
+}
 const CITIES = [
  ["Delhi","DL",28.6139,77.2090,["दिल्ली","new delhi"]],["Mumbai","MH",19.0760,72.8777,["मुंबई","bombay"]],
  ["Pune","MH",18.5204,73.8567,["पुणे"]],["Ahmedabad","GJ",23.0225,72.5714,["अहमदाबाद"]],
@@ -395,9 +449,25 @@ const CITIES = [
  ["Raipur","CG",21.2514,81.6296,["रायपुर"]],["Guwahati","AS",26.1445,91.7362,["गुवाहाटी"]],
  ["Kochi","KL",9.9312,76.2673,["कोच्चि","cochin"]],["Visakhapatnam","AP",17.6868,83.2185,["विशाखापत्तनम","vizag"]],
 ];
+const STATES_MAP = [
+  ["Bihar", "BR", ["बिहार", "bihar"]],
+  ["Gujarat", "GJ", ["गुजरात", "gujarat"]],
+  ["Maharashtra", "MH", ["महाराष्ट्र", "maharashtra"]],
+  ["Uttar Pradesh", "UP", ["उत्तर प्रदेश", "यूपी", "uttar pradesh"]],
+  ["Rajasthan", "RJ", ["राजस्थान", "rajasthan"]],
+  ["Madhya Pradesh", "MP", ["मध्य प्रदेश", "madhya pradesh"]],
+  ["Punjab", "PB", ["पंजाब", "punjab"]],
+  ["Haryana", "HR", ["हरियाणा", "haryana"]],
+  ["West Bengal", "WB", ["पश्चिम बंगाल", "bengal"]],
+  ["Jharkhand", "JH", ["झारखंड", "jharkhand"]],
+  ["Odisha", "OD", ["ओडिशा", "उड़ीसा", "odisha"]],
+  ["Delhi", "DL", ["दिल्ली", "delhi"]],
+];
+
 const findCity = (text) => {
   const t = (text || "").toLowerCase();
   for (const c of CITIES) if (t.includes(c[0].toLowerCase()) || c[4].some(a => t.includes(a.toLowerCase()))) return { name:c[0], state:c[1], lat:c[2], lng:c[3] };
+  for (const s of STATES_MAP) if (s[2].some(a => t.includes(a.toLowerCase()))) return { name:s[0], state:s[1] };
   return null;
 };
 async function resolveDestination(name) {
@@ -405,8 +475,10 @@ async function resolveDestination(name) {
   const c = findCity(name); if (c) return c;
   if (!isOnline()) return null;
   try {
+    const cleanQuery = name.replace(/मुझे|यहाँ|वेजेस|नहीं|मिली|काम|किया|था|लेकिन|पैसा|शिकायत|में|से|पर|और|को|का|की|के|आई|हूँ|जा|रहा|है|था|गया|मजदूरी/gi, " ").trim();
+    const q = cleanQuery || name;
     const ctl = new AbortController(); const to = setTimeout(() => ctl.abort(), 5000);
-    const r = await fetch("https://nominatim.openstreetmap.org/search?format=json&limit=1&addressdetails=1&countrycodes=in&q=" + encodeURIComponent(name), { signal: ctl.signal });
+    const r = await fetch("https://nominatim.openstreetmap.org/search?format=json&limit=1&addressdetails=1&countrycodes=in&q=" + encodeURIComponent(q), { signal: ctl.signal });
     clearTimeout(to); const j = await r.json();
     if (j[0]) return { name: j[0].display_name.split(",")[0], state: j[0].address?.state || "", lat:+j[0].lat, lng:+j[0].lon };
   } catch {}
@@ -981,20 +1053,29 @@ function Complaints() {
       r.onresult = (e) => {
         let t = ""; for (let i = 0; i < e.results.length; i++) t += e.results[i][0].transcript;
         transcribedText = t;
-        setF(prev => ({ ...prev, description: t }));
+        const autoCat = detectCategoryFromText(t);
+        setF(prev => ({ ...prev, description: t, ...(autoCat ? { category: autoCat } : {}) }));
       };
       r.onerror = (e) => { setListening(false); toast("Voice error: " + e.error); };
       r.onend = async () => {
         setListening(false);
         if (!transcribedText.trim()) return;
 
-        // Auto-extract location from speech if location field is empty
-        const foundLoc = findCity(transcribedText);
+        // Auto-extract category & location from speech
+        const autoCat = detectCategoryFromText(transcribedText);
         let currentLoc = f.location;
-        if (foundLoc && !currentLoc) {
-          currentLoc = foundLoc.name + (foundLoc.state ? ", " + foundLoc.state : "");
-          setF(prev => ({ ...prev, location: currentLoc }));
+        if (!currentLoc) {
+          const foundGeo = await extractLocationFromText(transcribedText);
+          if (foundGeo) {
+            currentLoc = foundGeo.name + (foundGeo.state ? ", " + foundGeo.state : "");
+          }
         }
+
+        setF(prev => ({
+          ...prev,
+          ...(autoCat ? { category: autoCat } : {}),
+          ...(currentLoc ? { location: currentLoc } : {})
+        }));
 
         // Check if location is still missing
         if (!currentLoc.trim()) {
@@ -1052,7 +1133,11 @@ function Complaints() {
                 <Icon n="mic" /> {listening ? "Listening…" : "🎙️ Speak Complaint"}
               </button>
             </div>
-            <textarea id="ds" value={f.description} onChange={e => setF({ ...f, description:e.target.value })} placeholder="Say when, where and who was involved. You can speak or write in any language." />
+            <textarea id="ds" value={f.description} onChange={e => {
+              const text = e.target.value;
+              const cat = detectCategoryFromText(text);
+              setF(prev => ({ ...prev, description: text, ...(cat ? { category: cat } : {}) }));
+            }} placeholder="Say when, where and who was involved. You can speak or write in any language." />
           </div>
           <div className="field"><label htmlFor="lc">Where (city / site)</label><input id="lc" value={f.location} onChange={e => setF({ ...f, location:e.target.value })} placeholder="Surat, GJ — Vesu construction site" /></div>
           <div className="field"><label>Photo or evidence (optional)</label><PhotoField photo={photo} setPhoto={setPhoto} /></div>
