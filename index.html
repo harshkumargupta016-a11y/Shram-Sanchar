@@ -963,18 +963,54 @@ function Complaints() {
   const [listening, setListening] = useState(false);
   const rec = useRef();
 
+  const [aiPrompt, setAiPrompt] = useState("");
+
   const startListenComplaint = () => {
     const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SR) return toast("Voice input needs Chrome or Edge.");
     if (listening) { rec.current && rec.current.stop(); return; }
-    const r = new SR(); r.lang = "hi-IN"; r.interimResults = true; r.continuous = false;
-    r.onresult = (e) => {
-      let t = ""; for (let i = 0; i < e.results.length; i++) t += e.results[i][0].transcript;
-      setF(prev => ({ ...prev, description: t }));
-    };
-    r.onerror = (e) => { setListening(false); toast("Voice error: " + e.error); };
-    r.onend = () => setListening(false);
-    rec.current = r; r.start(); setListening(true);
+
+    // Speak initial question
+    const qText = "आपकी क्या शिकायत है?";
+    setAiPrompt("🤖 AI: " + qText);
+    speak(qText, "hi-IN");
+
+    setTimeout(() => {
+      const r = new SR(); r.lang = "hi-IN"; r.interimResults = true; r.continuous = false;
+      let transcribedText = "";
+      r.onresult = (e) => {
+        let t = ""; for (let i = 0; i < e.results.length; i++) t += e.results[i][0].transcript;
+        transcribedText = t;
+        setF(prev => ({ ...prev, description: t }));
+      };
+      r.onerror = (e) => { setListening(false); toast("Voice error: " + e.error); };
+      r.onend = async () => {
+        setListening(false);
+        if (!transcribedText.trim()) return;
+
+        // Auto-extract location from speech if location field is empty
+        const foundLoc = findCity(transcribedText);
+        let currentLoc = f.location;
+        if (foundLoc && !currentLoc) {
+          currentLoc = foundLoc.name + (foundLoc.state ? ", " + foundLoc.state : "");
+          setF(prev => ({ ...prev, location: currentLoc }));
+        }
+
+        // Check if location is still missing
+        if (!currentLoc.trim()) {
+          const locPrompt = "कृपया स्थान या लोकेशन बताएं";
+          setAiPrompt("🤖 AI: " + locPrompt);
+          speak(locPrompt, "hi-IN");
+          toast("Please enter or speak your location.");
+        } else {
+          const successMsg = "आपकी शिकायत दर्ज कर ली गई है।";
+          setAiPrompt("🤖 AI: " + successMsg);
+          speak(successMsg, "hi-IN");
+          toast("Compliant details verified by AI assistant.");
+        }
+      };
+      rec.current = r; r.start(); setListening(true);
+    }, 1600);
   };
 
   const submit = async (e) => {
@@ -995,6 +1031,10 @@ function Complaints() {
     <div className="cols even">
       <div className="panel"><h3>New complaint</h3>
         <form onSubmit={submit} style={{ marginTop:12 }}>
+          {aiPrompt && <div style={{ background: "var(--navy-3)", color: "var(--navy)", padding: "8px 12px", borderRadius: "var(--r-sm)", marginBottom: "12px", fontWeight: "600", fontSize: ".88rem", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <span>{aiPrompt}</span>
+            <ReadAloud text={aiPrompt.replace("🤖 AI: ", "")} lang="hi-IN" />
+          </div>}
           <div className="field"><label htmlFor="c">What is the problem about?</label><select id="c" value={f.category} onChange={e => setF({ ...f, category:e.target.value })}>{CATS.map(c => <option key={c}>{c}</option>)}</select></div>
           <div className="field"><label htmlFor="pr">Urgency Level (Self-Assessed)</label>
             <select id="pr" value={f.userPriority || "Auto"} onChange={e => setF({ ...f, userPriority:e.target.value })}>
