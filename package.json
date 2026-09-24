@@ -1,0 +1,24 @@
+{
+  "name": "shram-sanchar",
+  "version": "2.0.0",
+  "description": "Consent-first mobility update layer for eShram",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2"
+  },
+  "keywords": [
+    "eShram",
+    "migrant-workers",
+    "mobility",
+    "privacy-first",
+    "gemini"
+  ],
+  "author": "",
+  "license": "MIT"
+}
