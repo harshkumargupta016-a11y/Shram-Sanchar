@@ -26,7 +26,9 @@
 }
 *{box-sizing:border-box}
 html{scroll-behavior:smooth}
-body{margin:0;font-family:var(--sans);color:var(--ink);background:var(--bg);line-height:1.55;-webkit-font-smoothing:antialiased}
+body{margin:0;font-family:var(--sans);color:var(--ink);background:var(--bg);line-height:1.55;-webkit-font-smoothing:antialiased;top:0!important}
+.goog-te-banner-frame{display:none!important}
+#google_translate_element{display:none!important}
 h1,h2,h3,h4{font-family:var(--serif);margin:0;line-height:1.2;color:var(--navy)}
 h1{font-size:clamp(2rem,4.6vw,3.3rem);letter-spacing:-.01em}
 h2{font-size:clamp(1.5rem,2.8vw,2.1rem)}
@@ -606,10 +608,35 @@ function Bars({ items, green }) {
 function Nav({ route }) {
   const { user, online, logout } = useApp();
   const L_ = [["home","Home"],["worker","Worker app"],["complaints","Complaint desk"],["admin","Admin"]];
+  const [lang, setLang] = useState("en");
+
+  const changeLanguage = (e) => {
+    const code = e.target.value;
+    setLang(code);
+    const select = document.querySelector(".goog-te-combo");
+    if (select) {
+      select.value = code;
+      select.dispatchEvent(new Event("change"));
+    }
+  };
+
   return <><div className="tri" /><nav className="nav"><div className="wrap">
     <a className="brand" href="#/home"><span className="mark"><Icon n="pin" /></span>Shram Sanchar</a>
     <div className="nav-links">{L_.map(([k, l]) => <a key={k} href={"#/" + k} className={route === k ? "on" : ""}>{l}</a>)}</div>
     <div className="nav-right">
+      <select value={lang} onChange={changeLanguage} style={{ width: "auto", padding: "4px 8px", fontSize: ".85rem", borderRadius: "var(--r-sm)", border: "1.5px solid var(--line)" }}>
+        <option value="en">🌐 English</option>
+        <option value="hi">हिन्दी (Hindi)</option>
+        <option value="mr">मराठी (Marathi)</option>
+        <option value="gu">ગુજરાતી (Gujarati)</option>
+        <option value="bn">বাংলা (Bengali)</option>
+        <option value="ta">தமிழ் (Tamil)</option>
+        <option value="te">తెలుగు (Telugu)</option>
+        <option value="kn">ಕನ್ನಡ (Kannada)</option>
+        <option value="ml">മലയാളം (Malayalam)</option>
+        <option value="pa">ਪੰਜਾਬੀ (Punjabi)</option>
+        <option value="or">ଓଡ଼ିଆ (Odia)</option>
+      </select>
       <span className={"pill " + (online ? "on" : "off")}><Icon n={online ? "wifi" : "wifioff"} />{online ? "Online" : "Offline"}</span>
       {user ? <><span className="small muted" style={{ maxWidth:110, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{user.name}</span><button className="btn ghost sm" onClick={logout}>Log out</button></>
             : <a className="btn primary sm" href="#/login">Log in</a>}
@@ -1137,6 +1164,17 @@ function App() {
 }
 ReactDOM.createRoot(document.getElementById("root")).render(<App />);
 </script>
+<div id="google_translate_element"></div>
+<script type="text/javascript">
+function googleTranslateElementInit() {
+  new google.translate.TranslateElement({
+    pageLanguage: 'en',
+    includedLanguages: 'en,hi,mr,gu,bn,ta,te,kn,ml,pa,or',
+    autoDisplay: false
+  }, 'google_translate_element');
+}
+</script>
+<script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 </body>
 </html>
 
