@@ -214,6 +214,23 @@ tr:last-child td{border-bottom:0}
 .hint{background:var(--amber-2);color:#6B4700;border-radius:var(--r-sm);padding:10px 12px;font-size:.85rem;margin-bottom:14px}
 .err{color:var(--red);font-size:.85rem;margin:-6px 0 10px}
 
+/* contractor */
+.trust-bar-wrap{height:10px;background:var(--bg);border-radius:99px;overflow:hidden;flex:1}
+.trust-bar-fill{height:100%;border-radius:99px;transition:width .4s}
+.trust-high{background:var(--green)}.trust-medium{background:var(--saffron)}.trust-low{background:var(--red)}
+.trust-badge{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:99px;font-size:.78rem;font-weight:700}
+.trust-badge.High{background:var(--green-2);color:var(--green)}.trust-badge.Medium{background:var(--amber-2);color:var(--amber)}.trust-badge.Low{background:var(--red-2);color:var(--red)}.trust-badge.Unverified{background:var(--bg);color:var(--muted)}
+.job-card{background:#fff;border:1px solid var(--line);border-radius:var(--r-md);padding:16px;position:relative}
+.job-card .jc-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap;margin-bottom:8px}
+.job-card h4{margin:0 0 2px;font-family:var(--sans);color:var(--ink);font-size:1rem}
+.job-card .jc-meta{font-size:.82rem;color:var(--muted);display:flex;flex-wrap:wrap;gap:6px 12px;margin-bottom:8px}
+.job-card .jc-desc{font-size:.9rem;color:var(--muted)}
+.job-card .jc-wage{font-weight:700;color:var(--green);font-size:.95rem}
+.relevance-pill{background:var(--navy-3);color:var(--navy);border-radius:99px;font-size:.72rem;font-weight:700;padding:2px 8px;white-space:nowrap}
+.contractor-reg{max-width:560px;margin:0 auto}
+.verified-chip{display:inline-flex;align-items:center;gap:4px;background:var(--green-2);color:var(--green);border-radius:99px;font-size:.78rem;font-weight:700;padding:2px 8px}
+.unverified-chip{display:inline-flex;align-items:center;gap:4px;background:var(--saffron-2);color:#A24E00;border-radius:99px;font-size:.78rem;font-weight:700;padding:2px 8px}
+
 /* chat */
 .chat-fab{position:fixed;right:20px;bottom:20px;z-index:60;width:58px;height:58px;border-radius:50%;border:0;background:var(--navy);color:#fff;display:grid;place-items:center;box-shadow:0 12px 28px -8px rgba(14,42,92,.7)}
 .chat-fab svg{width:26px;height:26px}
@@ -680,7 +697,16 @@ function Bars({ items, green }) {
    ===================================================================== */
 function Nav({ route }) {
   const { user, online, logout } = useApp();
-  const L_ = [["home","Home"],["worker","Worker app"],["schemes","Government Schemes"],["help","Help & FAQs"],["complaints","Complaint desk"],["admin","Admin"]];
+  const L_ = [
+    ["home","Home"],
+    ["worker","Worker app"],
+    ["jobs","Job Alerts"],
+    ["schemes","Schemes"],
+    ["help","Help & FAQs"],
+    ["complaints","Complaints"],
+    ["contractor-login","For Contractors"],
+    ["admin","Admin"],
+  ];
   const [lang, setLang] = useState("en");
 
   const changeLanguage = (e) => {
@@ -695,7 +721,10 @@ function Nav({ route }) {
 
   return <><div className="tri" /><nav className="nav"><div className="wrap">
     <a className="brand" href="#/home"><span className="mark"><Icon n="pin" /></span>Shram Sanchar</a>
-    <div className="nav-links">{L_.map(([k, l]) => <a key={k} href={"#/" + k} className={route === k ? "on" : ""}>{l}</a>)}</div>
+    <div className="nav-links">{L_.map(([k, l]) => {
+      const active = route === k || (k === "contractor-login" && route === "contractor");
+      return <a key={k} href={"#/" + k} className={active ? "on" : ""}>{l}</a>;
+    })}</div>
     <div className="nav-right">
       <select value={lang} onChange={changeLanguage} style={{ width: "auto", padding: "4px 8px", fontSize: ".85rem", borderRadius: "var(--r-sm)", border: "1.5px solid var(--line)" }}>
         <option value="en">🌐 English</option>
@@ -712,7 +741,7 @@ function Nav({ route }) {
       </select>
       <span className={"pill " + (online ? "on" : "off")}><Icon n={online ? "wifi" : "wifioff"} />{online ? "Online" : "Offline"}</span>
       {user ? <><span className="small muted" style={{ maxWidth:110, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{user.name}</span><button className="btn ghost sm" onClick={logout}>Log out</button></>
-            : <a className="btn primary sm" href="#/login">Log in</a>}
+            : <><a className="btn primary sm" href="#/login">Worker login</a><a className="btn ghost sm" href="#/contractor-login" style={{ marginLeft:4 }}>Contractor</a></>}
     </div></div></nav></>;
 }
 
@@ -829,7 +858,11 @@ function Home() {
       <div className="grid3">
         <div className="panel"><h3>Worker app</h3><p className="muted small">Voice check-in, camera photo, offline queue and a map of your journey.</p><p style={{ marginTop:12 }}><a className="btn primary sm" href="#/worker">Open worker app</a></p></div>
         <div className="panel"><h3>Complaint desk</h3><p className="muted small">File a grievance. Gemini checks how urgent it is and routes it.</p><p style={{ marginTop:12 }}><a className="btn primary sm" href="#/complaints">Open complaint desk</a></p></div>
-        <div className="panel"><h3>Admin dashboard</h3><p className="muted small">Officer view: worker map, destinations, and a complaint queue sorted by priority.</p><p style={{ marginTop:12 }}><a className="btn primary sm" href="#/admin">Open admin</a></p></div>
+        <div className="panel"><h3>Admin dashboard</h3><p className="muted small">Officer view: worker map, destinations, complaint queue, and contractor verification.</p><p style={{ marginTop:12 }}><a className="btn primary sm" href="#/admin">Open admin</a></p></div>
+      </div>
+      <div className="grid2" style={{ marginTop:16 }}>
+        <div className="panel"><h3>Job Alerts for Workers</h3><p className="muted small">Location-matched job openings from admin-verified contractors. Personalised to your last check-in destination.</p><p style={{ marginTop:12 }}><a className="btn accent sm" href="#/jobs">Browse job alerts</a></p></div>
+        <div className="panel"><h3>Contractor Portal</h3><p className="muted small">Register, get a Gemini AI trust score, post job alerts, and reach workers at their destination.</p><p style={{ marginTop:12 }}><a className="btn ghost sm" href="#/contractor-login">Contractor login / register</a></p></div>
       </div>
     </div></section>
   </>;
@@ -1295,7 +1328,7 @@ function Admin() {
       <div className="kpi"><b>{open.length}</b><span>Open complaints</span></div>
       <div className="kpi"><b>{open.filter(c => c.priority === "Critical").length}</b><span>Critical, unresolved</span></div>
     </div>
-    <div className="tabs">{[["overview","Overview"],["complaints","Complaints"],["checkins","Check-ins"]].map(([k, l]) => <button key={k} className={tab === k ? "on" : ""} onClick={() => setTab(k)}>{l}</button>)}</div>
+    <div className="tabs">{[["overview","Overview"],["complaints","Complaints"],["checkins","Check-ins"],["contractors","Contractors"]].map(([k, l]) => <button key={k} className={tab === k ? "on" : ""} onClick={() => setTab(k)}>{l}</button>)}</div>
 
     {tab === "overview" && <div className="cols wide">
       <div className="panel"><h3>Where workers are now</h3><p className="small muted" style={{ marginBottom:12 }}>Click a dot for details.</p>
@@ -1326,6 +1359,8 @@ function Admin() {
       {[...all].sort((a, b) => b.createdAt - a.createdAt).map(c => <tr key={c.id}><td>{fmtTime(c.createdAt)}</td><td>{c.name}<br /><span className="small muted">UAN ••••{c.uan.slice(-4)}</span></td>
         <td>{c.destination}{c.state ? ", " + c.state : ""}</td><td>{c.jobType || "—"}</td><td>{INTENT[c.intent]}</td><td><span className={"badge b-" + c.status}>{c.status === "queued" ? "Queued on device" : "Synced"}</span></td></tr>)}
       {!all.length && <tr><td colSpan="6" className="empty">No check-ins yet.</td></tr>}</tbody></table></div>}
+
+    {tab === "contractors" && <AdminContractors />}
   </div></div>;
 }
 
@@ -1387,6 +1422,386 @@ function SettingsModal({ onClose }) {
 }
 
 /* =====================================================================
+   Contractor — shared helpers
+   ===================================================================== */
+const JOB_TYPES = ["Construction","Factory work","Agriculture","Domestic work","Delivery / Driving","Hospitality","Textile","Mining / Quarry","Security","Other"];
+const STATES_LIST = [["Andhra Pradesh","AP"],["Assam","AS"],["Bihar","BR"],["Chhattisgarh","CG"],["Delhi","DL"],["Gujarat","GJ"],["Haryana","HR"],["Himachal Pradesh","HP"],["Jharkhand","JH"],["Karnataka","KA"],["Kerala","KL"],["Madhya Pradesh","MP"],["Maharashtra","MH"],["Odisha","OD"],["Punjab","PB"],["Rajasthan","RJ"],["Tamil Nadu","TN"],["Telangana","TS"],["Uttar Pradesh","UP"],["Uttarakhand","UK"],["West Bengal","WB"]];
+
+function TrustBadge({ level, score }) {
+  const cls = level || "Unverified";
+  return <span className={"trust-badge " + cls}>
+    {cls === "High" ? "✓" : cls === "Medium" ? "~" : cls === "Low" ? "!" : "?"} {cls} Trust {score != null ? "(" + score + "/100)" : ""}
+  </span>;
+}
+
+function JobCard({ job, highlight }) {
+  return <div className="job-card">
+    <div className="jc-head">
+      <div>
+        <h4>{job.title}</h4>
+        <div style={{ fontSize:".8rem", color:"var(--muted)" }}>{job.company} · {job.contractorName}</div>
+      </div>
+      <div style={{ display:"flex", flexDirection:"column", alignItems:"flex-end", gap:4 }}>
+        <TrustBadge level={job.trustLevel} score={job.trustScore} />
+        {highlight && job.relevanceScore > 0 && <span className="relevance-pill">★ Matched to you</span>}
+      </div>
+    </div>
+    <div className="jc-meta">
+      <span>📍 {job.city}, {job.state}</span>
+      <span>🔧 {job.jobType}</span>
+      {job.wage && <span className="jc-wage">💰 {job.wage}</span>}
+      {job.vacancies && <span>👷 {job.vacancies} vacancies</span>}
+      {job.startDate && <span>📅 From {job.startDate}</span>}
+    </div>
+    {job.description && <p className="jc-desc">{job.description}</p>}
+  </div>;
+}
+
+/* =====================================================================
+   Contractor Login / Registration page
+   ===================================================================== */
+function ContractorLogin() {
+  const { setUser, toast } = useApp();
+  const [tab, setTab] = useState("login");
+  const [err, setErr] = useState("");
+  const [busy, setBusy] = useState(false);
+
+  // Login form state
+  const [lf, setLf] = useState({ mobile:"", password:"" });
+  const setL = k => e => setLf({ ...lf, [k]: e.target.value });
+
+  // Registration form state
+  const [rf, setRf] = useState({ name:"", company:"", mobile:"", email:"", password:"", confirmPw:"", city:"", state:"GJ", gst:"", description:"" });
+  const setR = k => e => setRf({ ...rf, [k]: e.target.value });
+
+  const doLogin = async (e) => {
+    e.preventDefault(); setErr(""); setBusy(true);
+    try {
+      const res = await fetch("/api/contractor/login", { method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({ mobile: lf.mobile, password: lf.password }) });
+      const data = await res.json();
+      if (!res.ok) { setErr(data.error || "Login failed."); setBusy(false); return; }
+      const u = { role:"contractor", name: data.contractor.name, contractorId: data.contractor.id, verified: data.contractor.verified, ...data.contractor };
+      localStorage.setItem("ss_user", JSON.stringify(u));
+      setUser(u);
+      toast("Welcome, " + data.contractor.name + "!");
+      go("contractor");
+    } catch { setErr("Network error. Try again."); }
+    setBusy(false);
+  };
+
+  const doRegister = async (e) => {
+    e.preventDefault(); setErr(""); setBusy(true);
+    if (rf.password !== rf.confirmPw) { setErr("Passwords do not match."); setBusy(false); return; }
+    if (rf.password.length < 6) { setErr("Password must be at least 6 characters."); setBusy(false); return; }
+    try {
+      const body = { name: rf.name, company: rf.company, mobile: rf.mobile, email: rf.email, password: rf.password, city: rf.city, state: rf.state, gst: rf.gst, description: rf.description };
+      const res = await fetch("/api/contractor/register", { method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify(body) });
+      const data = await res.json();
+      if (!res.ok) { setErr(data.error || "Registration failed."); setBusy(false); return; }
+      toast("Registered! Admin will review your account. Demo OTP skipped.");
+      const u = { role:"contractor", name: data.contractor.name, contractorId: data.contractor.id, verified: false, ...data.contractor };
+      localStorage.setItem("ss_user", JSON.stringify(u));
+      setUser(u);
+      go("contractor");
+    } catch { setErr("Network error. Try again."); }
+    setBusy(false);
+  };
+
+  return <div className="page"><div className="wrap"><div className="contractor-reg panel">
+    <h2 style={{ marginBottom:14 }}>Contractor Portal</h2>
+    <div className="hint">Demo credentials — Login: mobile <b>9876543210</b>, password <b>demo123</b> (verified) &nbsp;|&nbsp; mobile <b>9001234567</b> (Nashik farm, verified) &nbsp;|&nbsp; mobile <b>9123456789</b> (pending admin review)</div>
+    <div className="tabs">{[["login","Log in"],["register","Register"]].map(([k, l]) => <button key={k} className={tab === k ? "on" : ""} onClick={() => { setTab(k); setErr(""); }}>{l}</button>)}</div>
+
+    {tab === "login" && <form onSubmit={doLogin}>
+      <div className="field"><label htmlFor="cl-mob">Mobile number</label><input id="cl-mob" inputMode="numeric" maxLength={10} value={lf.mobile} onChange={setL("mobile")} placeholder="10-digit mobile" required /></div>
+      <div className="field"><label htmlFor="cl-pw">Password</label><input id="cl-pw" type="password" value={lf.password} onChange={setL("password")} required /></div>
+      {err && <p className="err">{err}</p>}
+      <button className="btn primary" style={{ width:"100%" }} disabled={busy}>{busy ? "Logging in…" : "Log in"}</button>
+    </form>}
+
+    {tab === "register" && <form onSubmit={doRegister}>
+      <div className="row">
+        <div className="field"><label htmlFor="cr-name">Your name *</label><input id="cr-name" value={rf.name} onChange={setR("name")} required /></div>
+        <div className="field"><label htmlFor="cr-co">Company name *</label><input id="cr-co" value={rf.company} onChange={setR("company")} required /></div>
+      </div>
+      <div className="row">
+        <div className="field"><label htmlFor="cr-mob">Mobile *</label><input id="cr-mob" inputMode="numeric" maxLength={10} value={rf.mobile} onChange={setR("mobile")} required /></div>
+        <div className="field"><label htmlFor="cr-email">Email</label><input id="cr-email" type="email" value={rf.email} onChange={setR("email")} placeholder="Optional — improves trust score" /></div>
+      </div>
+      <div className="row">
+        <div className="field"><label htmlFor="cr-city">City *</label><input id="cr-city" value={rf.city} onChange={setR("city")} required /></div>
+        <div className="field"><label htmlFor="cr-st">State *</label><select id="cr-st" value={rf.state} onChange={setR("state")}>{STATES_LIST.map(([n, c]) => <option key={c} value={c}>{n}</option>)}</select></div>
+      </div>
+      <div className="field"><label htmlFor="cr-gst">GST number <span className="muted small">(improves Gemini trust score)</span></label><input id="cr-gst" value={rf.gst} onChange={setR("gst")} placeholder="e.g. 27AAPFU0939F1ZV" /></div>
+      <div className="field"><label htmlFor="cr-desc">About your company / work</label><textarea id="cr-desc" value={rf.description} onChange={setR("description")} placeholder="Describe the type of work, locations, and worker conditions..." /></div>
+      <div className="row">
+        <div className="field"><label htmlFor="cr-pw">Password *</label><input id="cr-pw" type="password" value={rf.password} onChange={setR("password")} required /></div>
+        <div className="field"><label htmlFor="cr-cpw">Confirm password *</label><input id="cr-cpw" type="password" value={rf.confirmPw} onChange={setR("confirmPw")} required /></div>
+      </div>
+      {err && <p className="err">{err}</p>}
+      <p className="small muted" style={{ marginBottom:10 }}>After registration, Gemini AI will automatically compute a trust score based on your profile. An admin will review and verify your account before you can post jobs.</p>
+      <button className="btn primary" style={{ width:"100%" }} disabled={busy}>{busy ? "Registering…" : "Register as contractor"}</button>
+    </form>}
+  </div></div></div>;
+}
+
+/* =====================================================================
+   Contractor Dashboard
+   ===================================================================== */
+function ContractorDashboard() {
+  const { user, toast } = useApp();
+  const [tab, setTab] = useState("jobs");
+  const [jobs, setJobs] = useState([]);
+  const [loadingJobs, setLoadingJobs] = useState(true);
+  const [posting, setPosting] = useState(false);
+  const [jf, setJf] = useState({ title:"", jobType:"Construction", city:"", state:user?.state || "GJ", wage:"", vacancies:1, description:"", startDate:"" });
+  const setJ = k => e => setJf({ ...jf, [k]: e.target.value });
+  const [err, setErr] = useState("");
+
+  const loadJobs = async () => {
+    setLoadingJobs(true);
+    try {
+      const res = await fetch("/api/jobs/by-contractor/" + user.contractorId);
+      const d = await res.json();
+      setJobs(d.jobs || []);
+    } catch {}
+    setLoadingJobs(false);
+  };
+
+  useEffect(() => { loadJobs(); }, []);
+
+  const postJob = async (e) => {
+    e.preventDefault(); setErr(""); setPosting(true);
+    try {
+      const res = await fetch("/api/jobs/post", { method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({ ...jf, contractorId: user.contractorId }) });
+      const d = await res.json();
+      if (!res.ok) { setErr(d.error || "Failed to post job."); setPosting(false); return; }
+      toast("Job alert posted: " + d.job.title);
+      setJf({ title:"", jobType:"Construction", city:"", state:"GJ", wage:"", vacancies:1, description:"", startDate:"" });
+      loadJobs();
+      setTab("jobs");
+    } catch { setErr("Network error."); }
+    setPosting(false);
+  };
+
+  const ctr = user;
+
+  return <div className="page"><div className="wrap">
+    <div className="page-head">
+      <div>
+        <h2>Contractor Dashboard</h2>
+        <p>{ctr.company} · {ctr.city}{ctr.state ? ", " + ctr.state : ""}
+          &nbsp;{ctr.verified
+            ? <span className="verified-chip">✓ Verified</span>
+            : <span className="unverified-chip">⏳ Pending admin verification</span>}
+        </p>
+      </div>
+      <TrustBadge level={ctr.trustLevel} score={ctr.trustScore} />
+    </div>
+
+    {!ctr.verified && <div className="hint" style={{ marginBottom:18 }}>
+      ⏳ Your account is <b>pending admin verification</b>. You will be able to post job alerts once verified. In the meantime, you can explore the dashboard. Demo verified accounts: mobile 9876543210 or 9001234567.
+    </div>}
+
+    {ctr.trustReason && <div className="panel" style={{ marginBottom:16, padding:"12px 16px" }}>
+      <div style={{ display:"flex", alignItems:"center", gap:10, flexWrap:"wrap" }}>
+        <b style={{ fontSize:".9rem" }}>Gemini Trust Score:</b>
+        <TrustBadge level={ctr.trustLevel} score={ctr.trustScore} />
+        <div className="trust-bar-wrap" style={{ minWidth:120 }}>
+          <div className={"trust-bar-fill trust-" + (ctr.trustLevel || "low").toLowerCase()} style={{ width: (ctr.trustScore || 0) + "%" }} />
+        </div>
+        <span className="small muted" style={{ flex:1, minWidth:120 }}>{ctr.trustReason}</span>
+      </div>
+      {ctr.trustFlags && ctr.trustFlags.length > 0 && <div className="small muted" style={{ marginTop:6 }}>⚠ Flags: {ctr.trustFlags.join(" · ")}</div>}
+    </div>}
+
+    <div className="tabs">{[["jobs","My Job Alerts"],["post","Post New Job Alert"]].map(([k, l]) => <button key={k} className={tab === k ? "on" : ""} onClick={() => { setTab(k); setErr(""); }}>{l}</button>)}</div>
+
+    {tab === "jobs" && <div>
+      {loadingJobs ? <p className="muted">Loading…</p> : jobs.length === 0
+        ? <div className="empty panel">No job alerts posted yet. Use the "Post New Job Alert" tab to add one.</div>
+        : <div className="stack">{jobs.map(j => <JobCard key={j.id} job={j} highlight={false} />)}</div>}
+    </div>}
+
+    {tab === "post" && <div style={{ maxWidth:560 }}>
+      {!ctr.verified && <div className="hint">You must be verified by admin to post jobs.</div>}
+      <form onSubmit={postJob} className="panel">
+        <h3 style={{ marginBottom:14 }}>New Job Alert</h3>
+        <div className="field"><label htmlFor="jp-title">Job title *</label><input id="jp-title" value={jf.title} onChange={setJ("title")} placeholder="e.g. Mason, Harvest Worker, Factory Helper" required /></div>
+        <div className="row">
+          <div className="field"><label htmlFor="jp-type">Job type *</label><select id="jp-type" value={jf.jobType} onChange={setJ("jobType")}>{JOB_TYPES.map(t => <option key={t}>{t}</option>)}</select></div>
+          <div className="field"><label htmlFor="jp-vac">Vacancies</label><input id="jp-vac" type="number" min={1} value={jf.vacancies} onChange={setJ("vacancies")} /></div>
+        </div>
+        <div className="row">
+          <div className="field"><label htmlFor="jp-city">City *</label><input id="jp-city" value={jf.city} onChange={setJ("city")} placeholder="e.g. Surat" required /></div>
+          <div className="field"><label htmlFor="jp-st">State *</label><select id="jp-st" value={jf.state} onChange={setJ("state")}>{STATES_LIST.map(([n, c]) => <option key={c} value={c}>{n}</option>)}</select></div>
+        </div>
+        <div className="row">
+          <div className="field"><label htmlFor="jp-wage">Daily wage / salary</label><input id="jp-wage" value={jf.wage} onChange={setJ("wage")} placeholder="e.g. ₹600/day or ₹12,000/month" /></div>
+          <div className="field"><label htmlFor="jp-date">Start date</label><input id="jp-date" type="date" value={jf.startDate} onChange={setJ("startDate")} /></div>
+        </div>
+        <div className="field"><label htmlFor="jp-desc">Description</label><textarea id="jp-desc" value={jf.description} onChange={setJ("description")} placeholder="Skills required, accommodation, food, transport, contact info…" /></div>
+        {err && <p className="err">{err}</p>}
+        <button className="btn accent" disabled={posting || !ctr.verified}>{posting ? "Posting…" : "Post job alert"}</button>
+      </form>
+    </div>}
+  </div></div>;
+}
+
+/* =====================================================================
+   Worker Job Alerts (personalised feed for logged-in citizen)
+   ===================================================================== */
+function JobAlertsPage() {
+  const { user } = useApp();
+  const [jobs, setJobs] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [filter, setFilter] = useState({ state:"", city:"", jobType:"" });
+
+  const load = async () => {
+    setLoading(true);
+    try {
+      const params = new URLSearchParams();
+      // Default to last known worker destination if available
+      const dest = filter.state || (user && user.uan ? "" : "");
+      if (filter.state) params.set("state", filter.state);
+      if (filter.city) params.set("city", filter.city);
+      if (filter.jobType) params.set("jobType", filter.jobType);
+      const res = await fetch("/api/jobs/alerts?" + params.toString());
+      const d = await res.json();
+      setJobs(d.jobs || []);
+    } catch {}
+    setLoading(false);
+  };
+
+  useEffect(() => { load(); }, [filter.state, filter.city, filter.jobType]);
+
+  // Auto-fill location from last check-in if we can read it
+  useEffect(() => {
+    (async () => {
+      try {
+        const checkins = await DB.all("checkins");
+        const mine = checkins.filter(c => c.uan === user?.uan).sort((a, b) => b.createdAt - a.createdAt);
+        if (mine.length && !filter.state) {
+          setFilter(f => ({ ...f, state: mine[0].state || "", city: mine[0].destination || "" }));
+        }
+      } catch {}
+    })();
+  }, []);
+
+  const matched = jobs.filter(j => j.relevanceScore > 0);
+  const other   = jobs.filter(j => j.relevanceScore === 0);
+
+  return <div className="page"><div className="wrap">
+    <div className="page-head">
+      <div><h2>Job Alerts</h2><p>Personalised job openings from verified contractors — matched to your location.</p></div>
+    </div>
+
+    <div className="panel" style={{ marginBottom:16 }}>
+      <div className="row" style={{ margin:0 }}>
+        <div className="field" style={{ margin:0 }}><label>Filter by state</label>
+          <select value={filter.state} onChange={e => setFilter({ ...filter, state: e.target.value })}>
+            <option value="">All states</option>{STATES_LIST.map(([n, c]) => <option key={c} value={c}>{n} ({c})</option>)}
+          </select></div>
+        <div className="field" style={{ margin:0 }}><label>City (keyword)</label>
+          <input value={filter.city} onChange={e => setFilter({ ...filter, city: e.target.value })} placeholder="e.g. Surat" /></div>
+        <div className="field" style={{ margin:0 }}><label>Job type</label>
+          <select value={filter.jobType} onChange={e => setFilter({ ...filter, jobType: e.target.value })}>
+            <option value="">All types</option>{JOB_TYPES.map(t => <option key={t}>{t}</option>)}
+          </select></div>
+      </div>
+    </div>
+
+    {loading && <p className="muted">Loading job alerts…</p>}
+
+    {!loading && matched.length > 0 && <>
+      <h3 style={{ marginBottom:10, color:"var(--navy)" }}>★ Matched to your location</h3>
+      <div className="stack" style={{ marginBottom:22 }}>{matched.map(j => <JobCard key={j.id} job={j} highlight={true} />)}</div>
+    </>}
+
+    {!loading && other.length > 0 && <>
+      <h3 style={{ marginBottom:10, color:"var(--muted)" }}>Other job alerts</h3>
+      <div className="stack">{other.map(j => <JobCard key={j.id} job={j} highlight={false} />)}</div>
+    </>}
+
+    {!loading && jobs.length === 0 && <div className="empty panel">No job alerts available right now. Check back soon.</div>}
+  </div></div>;
+}
+
+/* =====================================================================
+   Admin — contractor verification tab (patched into existing Admin)
+   ===================================================================== */
+function AdminContractors() {
+  const { toast } = useApp();
+  const [contractors, setContractors] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [busyId, setBusyId] = useState("");
+
+  const load = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch("/api/contractor/list");
+      const d = await res.json();
+      setContractors(d.contractors || []);
+    } catch {}
+    setLoading(false);
+  };
+
+  useEffect(() => { load(); }, []);
+
+  const verify = async (id, v) => {
+    setBusyId(id);
+    try {
+      const res = await fetch("/api/contractor/verify", { method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({ id, verified: v }) });
+      const d = await res.json();
+      if (d.success) { toast(d.contractor.name + (v ? " verified ✓" : " rejected ✗")); load(); }
+    } catch { toast("Error updating."); }
+    setBusyId("");
+  };
+
+  const reScore = async (id) => {
+    setBusyId(id + "-score");
+    try {
+      const res = await fetch("/api/contractor/trust-score", { method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({ id }) });
+      const d = await res.json();
+      if (d.success) { toast("Trust score updated: " + d.contractor.trustScore + "/100"); load(); }
+    } catch { toast("Gemini score error."); }
+    setBusyId("");
+  };
+
+  if (loading) return <p className="muted">Loading contractors…</p>;
+  if (!contractors.length) return <div className="empty">No contractors registered yet.</div>;
+
+  return <div className="stack">
+    {contractors.map(c => <div key={c.id} className="panel">
+      <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", flexWrap:"wrap", gap:10 }}>
+        <div>
+          <div style={{ display:"flex", gap:8, alignItems:"center", flexWrap:"wrap", marginBottom:4 }}>
+            <b>{c.company}</b>
+            <span className="small muted">({c.name})</span>
+            {c.verified ? <span className="verified-chip">✓ Verified</span> : <span className="unverified-chip">⏳ Pending</span>}
+            <TrustBadge level={c.trustLevel} score={c.trustScore} />
+          </div>
+          <div className="small muted" style={{ marginBottom:4 }}>📍 {c.city}, {c.state} &nbsp;·&nbsp; 📞 {c.mobile} {c.email ? "·  " + c.email : ""} {c.gst ? "·  GST: " + c.gst : "·  ⚠ No GST"}</div>
+          <div className="small muted" style={{ marginBottom:4 }}>{c.description || <i>No description</i>}</div>
+          {c.trustReason && <div className="small" style={{ color:"var(--navy)", marginBottom:2 }}>Gemini: {c.trustReason}</div>}
+          {c.trustFlags && c.trustFlags.length > 0 && <div className="small" style={{ color:"var(--red)" }}>Flags: {c.trustFlags.join(", ")}</div>}
+          {c.trustScore != null && <div style={{ display:"flex", alignItems:"center", gap:8, marginTop:6 }}>
+            <div className="trust-bar-wrap"><div className={"trust-bar-fill trust-" + (c.trustLevel || "low").toLowerCase()} style={{ width: c.trustScore + "%" }} /></div>
+            <span className="small muted">{c.trustScore}/100</span>
+          </div>}
+        </div>
+        <div style={{ display:"flex", flexDirection:"column", gap:6 }}>
+          {!c.verified
+            ? <button className="btn primary sm" disabled={busyId === c.id} onClick={() => verify(c.id, true)}>{busyId === c.id ? "Saving…" : "✓ Verify"}</button>
+            : <button className="btn danger sm" disabled={busyId === c.id} onClick={() => verify(c.id, false)}>{busyId === c.id ? "Saving…" : "✗ Revoke"}</button>}
+          <button className="btn ghost sm" disabled={busyId === c.id + "-score"} onClick={() => reScore(c.id)}>{busyId === c.id + "-score" ? "Running…" : "Re-run Gemini score"}</button>
+        </div>
+      </div>
+    </div>)}
+  </div>;
+}
+
+/* =====================================================================
    App root
    ===================================================================== */
 function App() {
@@ -1408,13 +1823,16 @@ function App() {
   useEffect(() => { if (online && data.queue.length) syncQueue().then(n => { if (n) { toast(`Back online: ${n} queued check-in${n > 1 ? "s" : ""} synced.`); } reload(); }); }, [online, data.queue.length]);
 
   let page;
-  if (route === "home") page = <Home />;
-  else if (route === "login") page = <Login />;
-  else if (route === "worker") page = user?.role === "citizen" ? <Worker /> : <Login next="worker" need="citizen" />;
+  if (route === "home")         page = <Home />;
+  else if (route === "login")   page = <Login />;
+  else if (route === "contractor-login") page = <ContractorLogin />;
+  else if (route === "contractor") page = user?.role === "contractor" ? <ContractorDashboard /> : <ContractorLogin />;
+  else if (route === "jobs")    page = <JobAlertsPage />;
+  else if (route === "worker")  page = user?.role === "citizen" ? <Worker /> : <Login next="worker" need="citizen" />;
   else if (route === "schemes") page = <GovernmentSchemesPage />;
-  else if (route === "help") page = <HelpCentrePage />;
+  else if (route === "help")    page = <HelpCentrePage />;
   else if (route === "complaints") page = user?.role === "citizen" ? <Complaints /> : <Login next="complaints" need="citizen" />;
-  else if (route === "admin") page = user?.role === "admin" ? <Admin /> : <Login next="admin" need="admin" />;
+  else if (route === "admin")   page = user?.role === "admin" ? <Admin /> : <Login next="admin" need="admin" />;
   else page = <Home />;
 
   return <AppCtx.Provider value={{ user, setUser, logout, data, reload, online, sim, setSim, toast }}>
