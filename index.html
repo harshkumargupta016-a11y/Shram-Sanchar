@@ -765,7 +765,7 @@ function GovFooter() {
     <div className="helplines">{HELPLINES.map(([n, l, h]) => <div className="hl" key={n}><b><a href={h}>{n}</a></b><span>{l}</span></div>)}</div>
     <h3>Official government links</h3>
     <div className="links">{GOVLINKS.map(([l, d, h]) => <a key={h} href={h} target="_blank" rel="noopener noreferrer">{l}<span>{d}</span></a>)}</div>
-    <p className="disclaimer">Shram Sanchar is a hackathon prototype built for IBM Bob 2.0 and is not an official Government of India service. Helpline numbers and links are listed for convenience — please confirm them on the official portals before relying on them. Demo data on the admin page is fictional.</p>
+    <p className="disclaimer">Shram Sanchar is a hackathon prototype built for Hackoctober fest hackathon and is not an official Government of India service. Helpline numbers and links are listed for convenience — please confirm them on the official portals before relying on them. Demo data on the admin page is fictional.</p>
   </div></footer>;
 }
 
@@ -1368,6 +1368,7 @@ function Admin() {
    Chat assistant (Gemini) + AI settings
    ===================================================================== */
 const FAQ = [
+  [/^(hello|hi|hey|namaste|pranam| प्रणाम|नमस्ते|हेलो|हेलो)/i, "Namaste! How can I assist you today? You can ask me anything about eShram, mobility check-ins, schemes, complaints, or any general question."],
   [/uan|register|card|e-?shram/i, "Your UAN is the 12-digit Universal Account Number on your e-Shram card. It stays the same across states. To register or fix details, visit eshram.gov.in or call the e-Shram helpline 14434."],
   [/wage|salary|paid|pay/i, "If wages are unpaid, note the employer name, site and dates, then file a complaint in the Complaint desk. You can also call the e-Shram helpline 14434 or approach your District Labour Office."],
   [/danger|threat|violence|beat|trapped|emergency/i, "If you are in danger, call 112 right now. For women in distress call 181, and for children 1098."],
@@ -1381,14 +1382,20 @@ function Chat() {
   useEffect(() => { end.current && end.current.scrollIntoView({ block:"end" }); }, [msgs, open]);
   const send = async (text) => {
     text = (text ?? q).trim(); if (!text || busy) return; setQ(""); const next = [...msgs, { role:"me", text }]; setMsgs(next); setBusy(true);
-    const system = `You are the Shram Sanchar assistant for Indian migrant and unorganised workers using the eShram portal. Reply in the same language the user writes in, in short, plain, respectful sentences (max 5 lines). Help with: eShram/UAN registration and updates, how check-ins work (opt-in, milestone-based, offline-first, consent-first), unpaid wages, workplace safety, and filing a complaint in this app's Complaint desk. For emergencies say call 112; e-Shram helpline is 14434; women helpline 181; Childline 1098. Never invent scheme amounts, dates or legal claims — if unsure, point to eshram.gov.in or the helpline. ${user ? "The user's name is " + user.name + "." : ""}`;
+    const system = `You are the Shram Sahayak AI assistant for the Shram Sanchar portal and eShram platform. Reply in the user's language. You can answer ANY question the user asks, whether related to Shram Sanchar / eShram (e.g. UAN registration, check-ins, privacy, schemes, unpaid wages, complaints, contractor portal) or NOT related (e.g. general knowledge, science, math, technology, general advice). For emergencies mention 112; e-Shram helpline 14434. ${user ? "The user's name is " + user.name + "." : ""}`;
     try {
       const contents = next.filter((m, i) => i > 0).map(m => ({ role: m.role === "me" ? "user" : "model", parts:[{ text:m.text }] }));
       const reply = await gemini({ system, contents });
       setMsgs(m => [...m, { role:"bot", text: reply || "Sorry, I could not answer that." }]);
     } catch (e) {
       const hit = FAQ.find(x => x[0].test(text));
-      setMsgs(m => [...m, { role:"bot", text: (hit ? hit[1] : "For any eShram question, call the helpline 14434 or visit eshram.gov.in.") }]);
+      let fallbackText = "I'm currently unable to connect to AI services. How can I help you regarding eShram or Shram Sanchar?";
+      if (/^(hello|hi|hey|namaste|pranam| प्रणाम|नमस्ते|हेलो)/i.test(text)) {
+        fallbackText = "Namaste! How can I assist you today? Ask me any question about eShram, mobility check-ins, complaints, or general queries.";
+      } else if (hit) {
+        fallbackText = hit[1];
+      }
+      setMsgs(m => [...m, { role:"bot", text: fallbackText }]);
     }
     setBusy(false);
   };

@@ -70,21 +70,25 @@ app.post('/api/ai/assistant', async (req, res) => {
       return res.status(400).json({ error: 'Prompt is required' });
     }
 
-    const system = `You are "Shram Sahayak", an empathetic, clear, and highly accessible voice & text AI assistant for Indian migrant workers using the Shram Sanchar portal.
-Reply in the user's primary language (${lang} / language of their message).
-Keep answers very short, simple, and respectful (3-5 lines max). Avoid complex technical jargon.
-User context: ${user ? `Name: ${user.name}, UAN: ${user.uan}` : 'Guest / Not logged in'}.
+    const system = `You are "Shram Sahayak", a helpful, friendly, and knowledgeable AI assistant for the Shram Sanchar portal and eShram ecosystem, powered by Gemini.
+You answer ANY question the user asks, whether it is directly related to Shram Sanchar / eShram or NOT related (e.g. general knowledge, science, coding, daily queries, history, math, etc.).
 
-Knowledge base:
-- Login: UAN (12 digits) + OTP verification (demo OTP: 123456).
-- UAN: Universal Account Number issued under eShram portal for unorganised workers.
-- Location updates: Workers update mobility voluntarily using voice/text.
-- Privacy & Location: GPS/location is strictly OFF by default and never tracked continuously. Only accessed ONCE when worker permits during a mobility update.
-- eShram: Official Government portal for unorganised migrant workers to access social security benefits.
-- Government Schemes: Financial Support, Health (PM-JAY), Housing (PMAY), Employment, Pension (PM-SYM), Skill Development.
-- Helplines: eShram (14434), Emergency (112), Ambulance (108), Women (181), Childline (1098).
+For Shram Sanchar and eShram questions:
+- Provide accurate, simple, and empathetic information.
+- User context: ${user ? `Name: ${user.name}, UAN: ${user.uan}` : 'Guest / Not logged in'}.
+- Key features & knowledge:
+  * Login: UAN (12 digits) + OTP verification (demo OTP: 123456).
+  * UAN: Universal Account Number issued under eShram portal for unorganised workers.
+  * Location updates: Workers update mobility voluntarily using voice/text.
+  * Privacy & Location: GPS/location is strictly OFF by default and never tracked continuously. Only accessed ONCE when worker permits during a mobility update.
+  * eShram: Official Government portal for unorganised migrant workers to access social security benefits.
+  * Government Schemes: Financial Support, Health (PM-JAY), Housing (PMAY), Employment, Pension (PM-SYM), Skill Development.
+  * Helplines: eShram (14434), Emergency (112), Ambulance (108), Women (181), Childline (1098).
 
-If the user asks about pensions, schemes, complaints, or logins, guide them directly in simple words.`;
+For general / unrelated questions:
+- Answer accurately and concisely in a helpful, clear manner.
+
+Reply in the user's primary language (${lang} / language of their message). Avoid overly dense jargon.`;
 
     const contents = [
       ...history.map(m => ({
@@ -103,7 +107,9 @@ If the user asks about pensions, schemes, complaints, or logins, guide them dire
     const promptLower = (req.body.prompt || '').toLowerCase();
     let reply = "Shram Sanchar helps you update your work location easily with voice. Call eShram helpline 14434 for official support.";
     
-    if (promptLower.includes('login') || promptLower.includes('log in') || promptLower.includes('लॉगिन')) {
+    if (promptLower.includes('hello') || promptLower.includes('hi') || promptLower.includes('namaste') || promptLower.includes('नमस्ते') || promptLower.includes('हेलो')) {
+      reply = "Namaste! How can I help you today? You can ask me anything about eShram, mobility check-ins, government schemes, or general queries.";
+    } else if (promptLower.includes('login') || promptLower.includes('log in') || promptLower.includes('लॉगिन')) {
       reply = "To log in: Enter your name, 12-digit UAN number, and mobile number. You will receive an OTP (for demo, enter 123456).";
     } else if (promptLower.includes('uan') || promptLower.includes('यूएएन')) {
       reply = "UAN is your 12-digit eShram Universal Account Number. It connects your migrant worker profile across all Indian states.";
